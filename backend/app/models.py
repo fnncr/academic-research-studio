@@ -93,3 +93,41 @@ class SearchRun(Base):
     status: Mapped[str] = mapped_column(String(20))
     results: Mapped[list] = mapped_column(JSONB)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class Evidence(Base):
+    __tablename__ = 'evidence'
+    __table_args__ = (UniqueConstraint('project_id', 'request_id', name='uq_evidence_request'),)
+    id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
+    project_id: Mapped[UUID] = mapped_column(ForeignKey('projects.id'), index=True)
+    source_version_id: Mapped[UUID] = mapped_column(ForeignKey('source_versions.id'))
+    request_id: Mapped[UUID] = mapped_column()
+    request_hash: Mapped[str] = mapped_column(String(64))
+    content_hash: Mapped[str] = mapped_column(String(64))
+    content: Mapped[dict] = mapped_column(JSONB)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class ResearchPlanRevision(Base):
+    __tablename__ = 'research_plan_revisions'
+    __table_args__ = (
+        UniqueConstraint('project_id', 'number', name='uq_plan_number'),
+        UniqueConstraint('project_id', 'request_id', name='uq_plan_request'),
+        CheckConstraint('number > 0', name='ck_plan_number'),
+    )
+    id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
+    project_id: Mapped[UUID] = mapped_column(ForeignKey('projects.id'), index=True)
+    manuscript_revision_id: Mapped[UUID] = mapped_column(ForeignKey('manuscript_revisions.id'))
+    parent_id: Mapped[UUID | None] = mapped_column(ForeignKey('research_plan_revisions.id'))
+    number: Mapped[int] = mapped_column(Integer)
+    request_id: Mapped[UUID] = mapped_column()
+    request_hash: Mapped[str] = mapped_column(String(64))
+    content_hash: Mapped[str] = mapped_column(String(64))
+    document: Mapped[dict] = mapped_column(JSONB)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class PlanEvidenceReference(Base):
+    __tablename__ = 'plan_evidence_references'
+    plan_revision_id: Mapped[UUID] = mapped_column(ForeignKey('research_plan_revisions.id'), primary_key=True)
+    evidence_id: Mapped[UUID] = mapped_column(ForeignKey('evidence.id'), primary_key=True)

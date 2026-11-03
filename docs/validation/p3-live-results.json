@@ -1,0 +1,1339 @@
+{
+  "checked_at": "2026-11-03T19:57:37.054064+00:00",
+  "checks": [
+    {
+      "expected": {
+        "doi": "10.1038/171737a0",
+        "year": 1953,
+        "title": "Molecular Structure of Nucleic Acids: A Structure for Deoxyribose Nucleic Acid",
+        "authors": [
+          "watson",
+          "crick"
+        ],
+        "container": "Nature"
+      },
+      "mode": "doi",
+      "result": {
+        "provider": "crossref",
+        "adapter_version": "1",
+        "checked_at": "2026-11-03T19:57:37.054645+00:00",
+        "status": "completed",
+        "code": "ok",
+        "hits": [
+          {
+            "id": "crossref:1",
+            "rank": 1,
+            "metadata": {
+              "title": "Molecular Structure of Nucleic Acids: A Structure for Deoxyribose Nucleic Acid",
+              "authors": [
+                "J. D. WATSON",
+                "F. H. C. CRICK"
+              ],
+              "year": 1953,
+              "kind": "article",
+              "language": "en",
+              "container": "Nature",
+              "publisher": "Springer Science and Business Media LLC",
+              "doi": "10.1038/171737a0",
+              "isbn": null,
+              "url": "https://doi.org/10.1038/171737a0"
+            }
+          }
+        ],
+        "skipped_records": 0
+      },
+      "checks": {
+        "expected_doi_found": true,
+        "title": true,
+        "year": true,
+        "expected_author_surnames": true,
+        "container": true
+      }
+    },
+    {
+      "expected": {
+        "doi": "10.1038/171737a0",
+        "year": 1953,
+        "title": "Molecular Structure of Nucleic Acids: A Structure for Deoxyribose Nucleic Acid",
+        "authors": [
+          "watson",
+          "crick"
+        ],
+        "container": "Nature"
+      },
+      "mode": "search",
+      "result": {
+        "provider": "crossref",
+        "adapter_version": "1",
+        "checked_at": "2026-11-03T19:57:37.785230+00:00",
+        "status": "completed",
+        "code": "ok",
+        "hits": [
+          {
+            "id": "crossref:1",
+            "rank": 1,
+            "metadata": {
+              "title": "MOLECULAR STRUCTURE OF NUCLEIC ACIDS",
+              "authors": [
+                "J. D. Watson"
+              ],
+              "year": 1993,
+              "kind": "article",
+              "language": "en",
+              "container": "JAMA",
+              "publisher": "American Medical Association (AMA)",
+              "doi": "10.1001/jama.1993.03500150078030",
+              "isbn": null,
+              "url": "https://doi.org/10.1001/jama.1993.03500150078030"
+            }
+          },
+          {
+            "id": "crossref:2",
+            "rank": 2,
+            "metadata": {
+              "title": "Molecular structure of nucleic acids",
+              "authors": [
+                "J. D. Watson",
+                "F. H. C. Crick"
+              ],
+              "year": 2004,
+              "kind": "article",
+              "language": "en",
+              "container": "Resonance",
+              "publisher": "Springer Science and Business Media LLC",
+              "doi": "10.1007/bf02834980",
+              "isbn": null,
+              "url": "https://doi.org/10.1007/bf02834980"
+            }
+          },
+          {
+            "id": "crossref:3",
+            "rank": 3,
+            "metadata": {
+              "title": "Molecular Structure of Nucleic Acids: A Structure for Deoxyribose Nucleic Acid",
+              "authors": [
+                "J. D. WATSON",
+                "F. H. C. CRICK"
+              ],
+              "year": 1974,
+              "kind": "article",
+              "language": "en",
+              "container": "Nature",
+              "publisher": "Springer Science and Business Media LLC",
+              "doi": "10.1038/248765a0",
+              "isbn": null,
+              "url": "https://doi.org/10.1038/248765a0"
+            }
+          },
+          {
+            "id": "crossref:4",
+            "rank": 4,
+            "metadata": {
+              "title": "Molecular Structure Of Nucleic Acids",
+              "authors": [
+                "J.D. Watson",
+                "F.H.C. Crick"
+              ],
+              "year": 2003,
+              "kind": "article",
+              "language": "en",
+              "container": "American Journal of Psychiatry",
+              "publisher": "American Psychiatric Association Publishing",
+              "doi": "10.1176/appi.ajp.160.4.623",
+              "isbn": null,
+              "url": "https://doi.org/10.1176/appi.ajp.160.4.623"
+            }
+          },
+          {
+            "id": "crossref:5",
+            "rank": 5,
+            "metadata": {
+              "title": "Molecular Structure of Nucleic Acids: A Structure for Deoxyribose Nucleic Acid",
+              "authors": [
+                "J. D. WATSON",
+                "F. H. C. CRICK"
+              ],
+              "year": 1953,
+              "kind": "article",
+              "language": "en",
+              "container": "Nature",
+              "publisher": "Springer Science and Business Media LLC",
+              "doi": "10.1038/171737a0",
+              "isbn": null,
+              "url": "https://doi.org/10.1038/171737a0"
+            }
+          }
+        ],
+        "skipped_records": 0
+      },
+      "checks": {
+        "expected_doi_found": true,
+        "title": true,
+        "year": true,
+        "expected_author_surnames": true,
+        "container": true
+      }
+    },
+    {
+      "expected": {
+        "doi": "10.1371/journal.pmed.0020124",
+        "year": 2005,
+        "title": "Why Most Published Research Findings Are False",
+        "authors": [
+          "ioannidis"
+        ],
+        "container": "PLoS Medicine"
+      },
+      "mode": "doi",
+      "result": {
+        "provider": "crossref",
+        "adapter_version": "1",
+        "checked_at": "2026-11-03T19:57:39.854583+00:00",
+        "status": "completed",
+        "code": "ok",
+        "hits": [
+          {
+            "id": "crossref:1",
+            "rank": 1,
+            "metadata": {
+              "title": "Why Most Published Research Findings Are False",
+              "authors": [
+                "John P. A. Ioannidis"
+              ],
+              "year": 2005,
+              "kind": "article",
+              "language": "en",
+              "container": "PLoS Medicine",
+              "publisher": "Public Library of Science (PLoS)",
+              "doi": "10.1371/journal.pmed.0020124",
+              "isbn": null,
+              "url": "https://doi.org/10.1371/journal.pmed.0020124"
+            }
+          }
+        ],
+        "skipped_records": 0
+      },
+      "checks": {
+        "expected_doi_found": true,
+        "title": true,
+        "year": true,
+        "expected_author_surnames": true,
+        "container": true
+      }
+    },
+    {
+      "expected": {
+        "doi": "10.1371/journal.pmed.0020124",
+        "year": 2005,
+        "title": "Why Most Published Research Findings Are False",
+        "authors": [
+          "ioannidis"
+        ],
+        "container": "PLoS Medicine"
+      },
+      "mode": "search",
+      "result": {
+        "provider": "crossref",
+        "adapter_version": "1",
+        "checked_at": "2026-11-03T19:57:40.457997+00:00",
+        "status": "completed",
+        "code": "ok",
+        "hits": [
+          {
+            "id": "crossref:1",
+            "rank": 1,
+            "metadata": {
+              "title": "Why most pre-published research findings are false.",
+              "authors": [
+                "Sebastian Lobentanzer"
+              ],
+              "year": 2020,
+              "kind": "other",
+              "language": "und",
+              "container": "",
+              "publisher": "Center for Open Science",
+              "doi": "10.31219/osf.io/29jnp",
+              "isbn": null,
+              "url": "https://doi.org/10.31219/osf.io/29jnp"
+            }
+          },
+          {
+            "id": "crossref:2",
+            "rank": 2,
+            "metadata": {
+              "title": "Why Most Published Research Findings Are False",
+              "authors": [
+                "John P. A. Ioannidis"
+              ],
+              "year": 2005,
+              "kind": "article",
+              "language": "en",
+              "container": "PLoS Medicine",
+              "publisher": "Public Library of Science (PLoS)",
+              "doi": "10.1371/journal.pmed.0020124",
+              "isbn": null,
+              "url": "https://doi.org/10.1371/journal.pmed.0020124"
+            }
+          },
+          {
+            "id": "crossref:3",
+            "rank": 3,
+            "metadata": {
+              "title": "Why Most Published Research Findings are Still False, and Why You Should Care",
+              "authors": [
+                "Aaron Brown"
+              ],
+              "year": 2025,
+              "kind": "article",
+              "language": "und",
+              "container": "Pan Pacific Symposium",
+              "publisher": "Surface Mount Technology Association",
+              "doi": "10.37665/pplavua65492",
+              "isbn": null,
+              "url": "https://doi.org/10.37665/pplavua65492"
+            }
+          },
+          {
+            "id": "crossref:4",
+            "rank": 4,
+            "metadata": {
+              "title": "Why Most Published Research Findings Are False",
+              "authors": [
+                "John P.A. Ioannidis"
+              ],
+              "year": 2019,
+              "kind": "article",
+              "language": "en",
+              "container": "CHANCE",
+              "publisher": "Informa UK Limited",
+              "doi": "10.1080/09332480.2019.1579573",
+              "isbn": null,
+              "url": "https://doi.org/10.1080/09332480.2019.1579573"
+            }
+          },
+          {
+            "id": "crossref:5",
+            "rank": 5,
+            "metadata": {
+              "title": "Correction: Why Most Published Research Findings Are False",
+              "authors": [
+                "John P. A. Ioannidis"
+              ],
+              "year": 2022,
+              "kind": "article",
+              "language": "en",
+              "container": "PLOS Medicine",
+              "publisher": "Public Library of Science (PLoS)",
+              "doi": "10.1371/journal.pmed.1004085",
+              "isbn": null,
+              "url": "https://doi.org/10.1371/journal.pmed.1004085"
+            }
+          }
+        ],
+        "skipped_records": 0
+      },
+      "checks": {
+        "expected_doi_found": true,
+        "title": true,
+        "year": true,
+        "expected_author_surnames": true,
+        "container": true
+      }
+    },
+    {
+      "expected": {
+        "doi": "10.1038/sdata.2016.18",
+        "year": 2016,
+        "title": "The FAIR Guiding Principles for scientific data management and stewardship",
+        "authors": [
+          "wilkinson"
+        ],
+        "container": "Scientific Data"
+      },
+      "mode": "doi",
+      "result": {
+        "provider": "crossref",
+        "adapter_version": "1",
+        "checked_at": "2026-11-03T19:57:44.331071+00:00",
+        "status": "completed",
+        "code": "ok",
+        "hits": [
+          {
+            "id": "crossref:1",
+            "rank": 1,
+            "metadata": {
+              "title": "The FAIR Guiding Principles for scientific data management and stewardship",
+              "authors": [
+                "Mark D. Wilkinson",
+                "Michel Dumontier",
+                "IJsbrand Jan Aalbersberg",
+                "Gabrielle Appleton",
+                "Myles Axton",
+                "Arie Baak",
+                "Niklas Blomberg",
+                "Jan-Willem Boiten",
+                "Luiz Bonino da Silva Santos",
+                "Philip E. Bourne",
+                "Jildau Bouwman",
+                "Anthony J. Brookes",
+                "Tim Clark",
+                "Mercè Crosas",
+                "Ingrid Dillo",
+                "Olivier Dumon",
+                "Scott Edmunds",
+                "Chris T. Evelo",
+                "Richard Finkers",
+                "Alejandra Gonzalez-Beltran",
+                "Alasdair J.G. Gray",
+                "Paul Groth",
+                "Carole Goble",
+                "Jeffrey S. Grethe",
+                "Jaap Heringa",
+                "Peter A.C ’t Hoen",
+                "Rob Hooft",
+                "Tobias Kuhn",
+                "Ruben Kok",
+                "Joost Kok",
+                "Scott J. Lusher",
+                "Maryann E. Martone",
+                "Albert Mons",
+                "Abel L. Packer",
+                "Bengt Persson",
+                "Philippe Rocca-Serra",
+                "Marco Roos",
+                "Rene van Schaik",
+                "Susanna-Assunta Sansone",
+                "Erik Schultes",
+                "Thierry Sengstag",
+                "Ted Slater",
+                "George Strawn",
+                "Morris A. Swertz",
+                "Mark Thompson",
+                "Johan van der Lei",
+                "Erik van Mulligen",
+                "Jan Velterop",
+                "Andra Waagmeester",
+                "Peter Wittenburg",
+                "Katherine Wolstencroft",
+                "Jun Zhao",
+                "Barend Mons"
+              ],
+              "year": 2016,
+              "kind": "article",
+              "language": "en",
+              "container": "Scientific Data",
+              "publisher": "Springer Science and Business Media LLC",
+              "doi": "10.1038/sdata.2016.18",
+              "isbn": null,
+              "url": "https://doi.org/10.1038/sdata.2016.18"
+            }
+          }
+        ],
+        "skipped_records": 0
+      },
+      "checks": {
+        "expected_doi_found": true,
+        "title": true,
+        "year": true,
+        "expected_author_surnames": true,
+        "container": true
+      }
+    },
+    {
+      "expected": {
+        "doi": "10.1038/sdata.2016.18",
+        "year": 2016,
+        "title": "The FAIR Guiding Principles for scientific data management and stewardship",
+        "authors": [
+          "wilkinson"
+        ],
+        "container": "Scientific Data"
+      },
+      "mode": "search",
+      "result": {
+        "provider": "crossref",
+        "adapter_version": "1",
+        "checked_at": "2026-11-03T19:57:44.907805+00:00",
+        "status": "completed",
+        "code": "ok",
+        "hits": [
+          {
+            "id": "crossref:1",
+            "rank": 1,
+            "metadata": {
+              "title": "Faculty Opinions recommendation of The FAIR Guiding Principles for scientific data management and stewardship.",
+              "authors": [
+                "Stefan Schulz"
+              ],
+              "year": 2018,
+              "kind": "dataset",
+              "language": "und",
+              "container": "Faculty Opinions – Post-Publication Peer Review of the Biomedical Literature",
+              "publisher": "H1 Connect",
+              "doi": "10.3410/f.726216348.793543848",
+              "isbn": null,
+              "url": "https://doi.org/10.3410/f.726216348.793543848"
+            }
+          },
+          {
+            "id": "crossref:2",
+            "rank": 2,
+            "metadata": {
+              "title": "A formalization of one of the main claims of “The FAIR Guiding Principles for scientific data management and stewardship” by Wilkinson et al. 2016",
+              "authors": [
+                "Michel Dumontier"
+              ],
+              "year": 2022,
+              "kind": "article",
+              "language": "en",
+              "container": "Data Science",
+              "publisher": "SAGE Publications",
+              "doi": "10.3233/ds-210047",
+              "isbn": null,
+              "url": "https://doi.org/10.3233/ds-210047"
+            }
+          },
+          {
+            "id": "crossref:3",
+            "rank": 3,
+            "metadata": {
+              "title": "The FAIR guiding principles for data stewardship: fair enough?",
+              "authors": [
+                "Martin Boeckhout",
+                "Gerhard A. Zielhuis",
+                "Annelien L. Bredenoord"
+              ],
+              "year": 2018,
+              "kind": "article",
+              "language": "en",
+              "container": "European Journal of Human Genetics",
+              "publisher": "Springer Science and Business Media LLC",
+              "doi": "10.1038/s41431-018-0160-0",
+              "isbn": null,
+              "url": "https://doi.org/10.1038/s41431-018-0160-0"
+            }
+          },
+          {
+            "id": "crossref:4",
+            "rank": 4,
+            "metadata": {
+              "title": "FAIR data principles and AI ethics: Exploring convergence and gaps",
+              "authors": [
+                "Anastasios G Papadiamantis",
+                "Iseult Lynch",
+                "Georgia Melagraki",
+                "Antreas Afantitis"
+              ],
+              "year": 2025,
+              "kind": "article",
+              "language": "en",
+              "container": "FAIR Connect: Empowering Data Stewardship",
+              "publisher": "SAGE Publications",
+              "doi": "10.1177/2949799x251403108",
+              "isbn": null,
+              "url": "https://doi.org/10.1177/2949799x251403108"
+            }
+          },
+          {
+            "id": "crossref:5",
+            "rank": 5,
+            "metadata": {
+              "title": "Data Stewardship for Open Science",
+              "authors": [
+                "Barend Mons"
+              ],
+              "year": 2018,
+              "kind": "monograph",
+              "language": "en",
+              "container": "",
+              "publisher": "Chapman and Hall/CRC",
+              "doi": "10.1201/9781315380711",
+              "isbn": "9781315380711",
+              "url": "https://doi.org/10.1201/9781315380711"
+            }
+          }
+        ],
+        "skipped_records": 0
+      },
+      "checks": {
+        "expected_doi_found": false
+      }
+    },
+    {
+      "expected": {
+        "doi": "10.1038/171737a0",
+        "year": 1953,
+        "title": "Molecular Structure of Nucleic Acids: A Structure for Deoxyribose Nucleic Acid",
+        "authors": [
+          "watson",
+          "crick"
+        ],
+        "container": "Nature"
+      },
+      "mode": "doi",
+      "result": {
+        "provider": "openalex",
+        "adapter_version": "1",
+        "checked_at": "2026-11-03T19:57:48.384935+00:00",
+        "status": "completed",
+        "code": "ok",
+        "hits": [
+          {
+            "id": "openalex:1",
+            "rank": 1,
+            "metadata": {
+              "title": "Molecular Structure of Nucleic Acids: A Structure for Deoxyribose Nucleic Acid",
+              "authors": [
+                "James Dewey Watson",
+                "Francis Harry Compton Crick"
+              ],
+              "year": 1953,
+              "kind": "article",
+              "language": "en",
+              "container": "Nature",
+              "publisher": "Nature Portfolio",
+              "doi": "10.1038/171737a0",
+              "isbn": null,
+              "url": "https://doi.org/10.1038/171737a0"
+            }
+          }
+        ],
+        "skipped_records": 0
+      },
+      "checks": {
+        "expected_doi_found": true,
+        "title": true,
+        "year": true,
+        "expected_author_surnames": true,
+        "container": true
+      }
+    },
+    {
+      "expected": {
+        "doi": "10.1038/171737a0",
+        "year": 1953,
+        "title": "Molecular Structure of Nucleic Acids: A Structure for Deoxyribose Nucleic Acid",
+        "authors": [
+          "watson",
+          "crick"
+        ],
+        "container": "Nature"
+      },
+      "mode": "search",
+      "result": {
+        "provider": "openalex",
+        "adapter_version": "1",
+        "checked_at": "2026-11-03T19:57:49.100116+00:00",
+        "status": "completed",
+        "code": "ok",
+        "hits": [
+          {
+            "id": "openalex:1",
+            "rank": 1,
+            "metadata": {
+              "title": "Molecular Structure of Nucleic Acids: A Structure for Deoxyribose Nucleic Acid",
+              "authors": [
+                "James Dewey Watson",
+                "Francis Harry Compton Crick"
+              ],
+              "year": 1953,
+              "kind": "article",
+              "language": "en",
+              "container": "Nature",
+              "publisher": "Nature Portfolio",
+              "doi": "10.1038/171737a0",
+              "isbn": null,
+              "url": "https://doi.org/10.1038/171737a0"
+            }
+          },
+          {
+            "id": "openalex:2",
+            "rank": 2,
+            "metadata": {
+              "title": "Molecular structure of nucleic acids. A structure for deoxyribose nucleic acid. 1953",
+              "authors": [
+                "James Dewey Watson"
+              ],
+              "year": 1993,
+              "kind": "article",
+              "language": "en",
+              "container": "JAMA",
+              "publisher": "American Medical Association",
+              "doi": "10.1001/jama.269.15.1966",
+              "isbn": null,
+              "url": "https://doi.org/10.1001/jama.269.15.1966"
+            }
+          },
+          {
+            "id": "openalex:3",
+            "rank": 3,
+            "metadata": {
+              "title": "Molecular Structure of Nucleic Acids: A Structure for Deoxyribose Nucleic Acid",
+              "authors": [
+                "James Dewey Watson",
+                "Francis Harry Compton Crick"
+              ],
+              "year": 1974,
+              "kind": "article",
+              "language": "en",
+              "container": "Nature",
+              "publisher": "Nature Portfolio",
+              "doi": "10.1038/248765a0",
+              "isbn": null,
+              "url": "https://doi.org/10.1038/248765a0"
+            }
+          },
+          {
+            "id": "openalex:4",
+            "rank": 4,
+            "metadata": {
+              "title": "Chapter 1. Molecular Structure of Nucleic Acids: A Structure for Deoxyribose Nucleic Acid",
+              "authors": [
+                "J. D. Watson",
+                "Francis Harry Compton Crick"
+              ],
+              "year": 2004,
+              "kind": "other",
+              "language": "en",
+              "container": "American Psychiatric Association Publishing eBooks",
+              "publisher": "",
+              "doi": "10.1176/appi.books.9781615377534.lg01",
+              "isbn": null,
+              "url": "https://doi.org/10.1176/appi.books.9781615377534.lg01"
+            }
+          },
+          {
+            "id": "openalex:5",
+            "rank": 5,
+            "metadata": {
+              "title": "Molecular Structure of Nucleic Acids: A Structure for Deoxyribose Nucleic Acid (Reprinted from Nature, April 25, 1953)",
+              "authors": [
+                "James Dewey Watson",
+                "Francis Harry Compton Crick"
+              ],
+              "year": 1969,
+              "kind": "article",
+              "language": "en",
+              "container": "Nature",
+              "publisher": "Nature Portfolio",
+              "doi": "10.1038/224470a0",
+              "isbn": null,
+              "url": "https://doi.org/10.1038/224470a0"
+            }
+          }
+        ],
+        "skipped_records": 0
+      },
+      "checks": {
+        "expected_doi_found": true,
+        "title": true,
+        "year": true,
+        "expected_author_surnames": true,
+        "container": true
+      }
+    },
+    {
+      "expected": {
+        "doi": "10.1371/journal.pmed.0020124",
+        "year": 2005,
+        "title": "Why Most Published Research Findings Are False",
+        "authors": [
+          "ioannidis"
+        ],
+        "container": "PLoS Medicine"
+      },
+      "mode": "doi",
+      "result": {
+        "provider": "openalex",
+        "adapter_version": "1",
+        "checked_at": "2026-11-03T19:57:49.894337+00:00",
+        "status": "completed",
+        "code": "ok",
+        "hits": [
+          {
+            "id": "openalex:1",
+            "rank": 1,
+            "metadata": {
+              "title": "Why Most Published Research Findings Are False",
+              "authors": [
+                "John P. A. Ioannidis"
+              ],
+              "year": 2005,
+              "kind": "article",
+              "language": "en",
+              "container": "PLoS Medicine",
+              "publisher": "Public Library of Science",
+              "doi": "10.1371/journal.pmed.0020124",
+              "isbn": null,
+              "url": "https://doi.org/10.1371/journal.pmed.0020124"
+            }
+          }
+        ],
+        "skipped_records": 0
+      },
+      "checks": {
+        "expected_doi_found": true,
+        "title": true,
+        "year": true,
+        "expected_author_surnames": true,
+        "container": true
+      }
+    },
+    {
+      "expected": {
+        "doi": "10.1371/journal.pmed.0020124",
+        "year": 2005,
+        "title": "Why Most Published Research Findings Are False",
+        "authors": [
+          "ioannidis"
+        ],
+        "container": "PLoS Medicine"
+      },
+      "mode": "search",
+      "result": {
+        "provider": "openalex",
+        "adapter_version": "1",
+        "checked_at": "2026-11-03T19:57:50.284544+00:00",
+        "status": "completed",
+        "code": "ok",
+        "hits": [
+          {
+            "id": "openalex:1",
+            "rank": 1,
+            "metadata": {
+              "title": "Why Most Published Research Findings Are False",
+              "authors": [
+                "John P. A. Ioannidis"
+              ],
+              "year": 2005,
+              "kind": "article",
+              "language": "en",
+              "container": "PLoS Medicine",
+              "publisher": "Public Library of Science",
+              "doi": "10.1371/journal.pmed.0020124",
+              "isbn": null,
+              "url": "https://doi.org/10.1371/journal.pmed.0020124"
+            }
+          },
+          {
+            "id": "openalex:2",
+            "rank": 2,
+            "metadata": {
+              "title": "Why Most Published Research Findings Are False",
+              "authors": [
+                "John P. A. Ioannidis"
+              ],
+              "year": 2005,
+              "kind": "article",
+              "language": "en",
+              "container": "CHANCE",
+              "publisher": "Taylor & Francis",
+              "doi": "10.1080/09332480.2005.10722754",
+              "isbn": null,
+              "url": "https://doi.org/10.1080/09332480.2005.10722754"
+            }
+          },
+          {
+            "id": "openalex:3",
+            "rank": 3,
+            "metadata": {
+              "title": "Why Most Published Research Findings Are False",
+              "authors": [
+                "John P. A. Ioannidis"
+              ],
+              "year": 2019,
+              "kind": "article",
+              "language": "en",
+              "container": "CHANCE",
+              "publisher": "Taylor & Francis",
+              "doi": "10.1080/09332480.2019.1579573",
+              "isbn": null,
+              "url": "https://doi.org/10.1080/09332480.2019.1579573"
+            }
+          },
+          {
+            "id": "openalex:4",
+            "rank": 4,
+            "metadata": {
+              "title": "Why most published research findings are false",
+              "authors": [
+                "James D. Brooks"
+              ],
+              "year": 2008,
+              "kind": "article",
+              "language": "en",
+              "container": "Urologic Oncology Seminars and Original Investigations",
+              "publisher": "Elsevier BV",
+              "doi": "10.1016/j.urolonc.2008.07.015",
+              "isbn": null,
+              "url": "https://doi.org/10.1016/j.urolonc.2008.07.015"
+            }
+          },
+          {
+            "id": "openalex:5",
+            "rank": 5,
+            "metadata": {
+              "title": "Correction: Why Most Published Research Findings Are False",
+              "authors": [
+                "John P. A. Ioannidis"
+              ],
+              "year": 2022,
+              "kind": "other",
+              "language": "en",
+              "container": "PLoS Medicine",
+              "publisher": "Public Library of Science",
+              "doi": "10.1371/journal.pmed.1004085",
+              "isbn": null,
+              "url": "https://doi.org/10.1371/journal.pmed.1004085"
+            }
+          }
+        ],
+        "skipped_records": 0
+      },
+      "checks": {
+        "expected_doi_found": true,
+        "title": true,
+        "year": true,
+        "expected_author_surnames": true,
+        "container": true
+      }
+    },
+    {
+      "expected": {
+        "doi": "10.1038/sdata.2016.18",
+        "year": 2016,
+        "title": "The FAIR Guiding Principles for scientific data management and stewardship",
+        "authors": [
+          "wilkinson"
+        ],
+        "container": "Scientific Data"
+      },
+      "mode": "doi",
+      "result": {
+        "provider": "openalex",
+        "adapter_version": "1",
+        "checked_at": "2026-11-03T19:57:51.299822+00:00",
+        "status": "completed",
+        "code": "ok",
+        "hits": [
+          {
+            "id": "openalex:1",
+            "rank": 1,
+            "metadata": {
+              "title": "The FAIR Guiding Principles for scientific data management and stewardship",
+              "authors": [
+                "Mark D. Wilkinson",
+                "Michel Dumontier",
+                "IJsbrand Jan Aalbersberg",
+                "Gabrielle Appleton",
+                "Myles Axton",
+                "Arie Baak",
+                "Niklas Blomberg",
+                "Jan‐Willem Boiten",
+                "Luiz Olavo Bonino da Silva Santos",
+                "Philip E. Bourne",
+                "Jildau Bouwman",
+                "Anthony J. Brookes",
+                "Tim Clark",
+                "Mercè Crosas",
+                "Ingrid Dillo",
+                "Olivier Dumon",
+                "Scott Edmunds",
+                "Chris T. Evelo",
+                "Richard Finkers",
+                "Alejandra N Gonzalez-Beltran",
+                "Alasdair J. G. Gray",
+                "Paul Groth",
+                "Carole Goble",
+                "Jeffrey Sean Grethe",
+                "Jaap Heringa",
+                "Peter A.C. ’t Hoen",
+                "Rob W W Hooft",
+                "Tobias Kuhn",
+                "Ruben G. Kok",
+                "Joost N. Kok",
+                "Scott J. Lusher",
+                "Maryann Elizabeth Martone",
+                "Albert Mons",
+                "Abel Laerte Packer",
+                "Bengt Persson",
+                "Philippe Rocca‐Serra",
+                "Marco Roos",
+                "René van Schaik",
+                "Susanna‐Assunta Sansone",
+                "Erik Schultes",
+                "Thierry Sengstag",
+                "Ted Slater",
+                "George Strawn",
+                "Morris A. Swertz",
+                "Mark Thompson",
+                "Johan van der Lei",
+                "Erik M. van Mulligen",
+                "Jan Velterop",
+                "Andra Waagmeester",
+                "Peter Wittenburg",
+                "Katherine Wolstencroft",
+                "Jun Zhao",
+                "Barend Mons"
+              ],
+              "year": 2016,
+              "kind": "other",
+              "language": "en",
+              "container": "Scientific Data",
+              "publisher": "Nature Portfolio",
+              "doi": "10.1038/sdata.2016.18",
+              "isbn": null,
+              "url": "https://doi.org/10.1038/sdata.2016.18"
+            }
+          }
+        ],
+        "skipped_records": 0
+      },
+      "checks": {
+        "expected_doi_found": true,
+        "title": true,
+        "year": true,
+        "expected_author_surnames": true,
+        "container": true
+      }
+    },
+    {
+      "expected": {
+        "doi": "10.1038/sdata.2016.18",
+        "year": 2016,
+        "title": "The FAIR Guiding Principles for scientific data management and stewardship",
+        "authors": [
+          "wilkinson"
+        ],
+        "container": "Scientific Data"
+      },
+      "mode": "search",
+      "result": {
+        "provider": "openalex",
+        "adapter_version": "1",
+        "checked_at": "2026-11-03T19:57:51.746605+00:00",
+        "status": "completed",
+        "code": "ok",
+        "hits": [
+          {
+            "id": "openalex:1",
+            "rank": 1,
+            "metadata": {
+              "title": "The FAIR Guiding Principles for scientific data management and stewardship",
+              "authors": [
+                "Mark D. Wilkinson",
+                "Michel Dumontier",
+                "IJsbrand Jan Aalbersberg",
+                "Gabrielle Appleton",
+                "Myles Axton",
+                "Arie Baak",
+                "Niklas Blomberg",
+                "Jan‐Willem Boiten",
+                "Luiz Olavo Bonino da Silva Santos",
+                "Philip E. Bourne",
+                "Jildau Bouwman",
+                "Anthony J. Brookes",
+                "Tim Clark",
+                "Mercè Crosas",
+                "Ingrid Dillo",
+                "Olivier Dumon",
+                "Scott Edmunds",
+                "Chris T. Evelo",
+                "Richard Finkers",
+                "Alejandra N Gonzalez-Beltran",
+                "Alasdair J. G. Gray",
+                "Paul Groth",
+                "Carole Goble",
+                "Jeffrey Sean Grethe",
+                "Jaap Heringa",
+                "Peter A.C. ’t Hoen",
+                "Rob W W Hooft",
+                "Tobias Kuhn",
+                "Ruben G. Kok",
+                "Joost N. Kok",
+                "Scott J. Lusher",
+                "Maryann Elizabeth Martone",
+                "Albert Mons",
+                "Abel Laerte Packer",
+                "Bengt Persson",
+                "Philippe Rocca‐Serra",
+                "Marco Roos",
+                "René van Schaik",
+                "Susanna‐Assunta Sansone",
+                "Erik Schultes",
+                "Thierry Sengstag",
+                "Ted Slater",
+                "George Strawn",
+                "Morris A. Swertz",
+                "Mark Thompson",
+                "Johan van der Lei",
+                "Erik M. van Mulligen",
+                "Jan Velterop",
+                "Andra Waagmeester",
+                "Peter Wittenburg",
+                "Katherine Wolstencroft",
+                "Jun Zhao",
+                "Barend Mons"
+              ],
+              "year": 2016,
+              "kind": "other",
+              "language": "en",
+              "container": "Scientific Data",
+              "publisher": "Nature Portfolio",
+              "doi": "10.1038/sdata.2016.18",
+              "isbn": null,
+              "url": "https://doi.org/10.1038/sdata.2016.18"
+            }
+          },
+          {
+            "id": "openalex:2",
+            "rank": 2,
+            "metadata": {
+              "title": "Addendum: The FAIR Guiding Principles for scientific data management and stewardship",
+              "authors": [
+                "Mark D. Wilkinson",
+                "Michel Dumontier",
+                "IJsbrand Jan Aalbersberg",
+                "Gabrielle Appleton",
+                "Myles Axton",
+                "Arie Baak",
+                "Niklas Blomberg",
+                "Jan‐Willem Boiten",
+                "Luiz Olavo Bonino da Silva Santos",
+                "Philip E. Bourne",
+                "Jildau Bouwman",
+                "Anthony J. Brookes",
+                "Tim Clark",
+                "Mercè Crosas",
+                "Ingrid Dillo",
+                "Olivier Dumon",
+                "Scott Edmunds",
+                "Chris T. Evelo",
+                "Richard Finkers",
+                "Alejandra N Gonzalez-Beltran",
+                "Alasdair J. G. Gray",
+                "Paul Groth",
+                "Carole Goble",
+                "Jeffrey Sean Grethe",
+                "Jaap Heringa",
+                "Peter A.C. ’t Hoen",
+                "Rob W W Hooft",
+                "Tobias Kuhn",
+                "Ruben G. Kok",
+                "Joost N. Kok",
+                "Scott J. Lusher",
+                "Maryann Elizabeth Martone",
+                "Albert Mons",
+                "Abel Laerte Packer",
+                "Bengt Persson",
+                "Philippe Rocca‐Serra",
+                "Marco Roos",
+                "René van Schaik",
+                "Susanna‐Assunta Sansone",
+                "Erik Schultes",
+                "Thierry Sengstag",
+                "Ted Slater",
+                "George Strawn",
+                "Morris A. Swertz",
+                "Mark Thompson",
+                "Johan van der Lei",
+                "Erik M. van Mulligen",
+                "Jan Velterop",
+                "Andra Waagmeester",
+                "Peter Wittenburg",
+                "Katherine Wolstencroft",
+                "Jun Zhao",
+                "Barend Mons"
+              ],
+              "year": 2019,
+              "kind": "other",
+              "language": "en",
+              "container": "Scientific Data",
+              "publisher": "Nature Portfolio",
+              "doi": "10.1038/s41597-019-0009-6",
+              "isbn": null,
+              "url": "https://doi.org/10.1038/s41597-019-0009-6"
+            }
+          },
+          {
+            "id": "openalex:3",
+            "rank": 3,
+            "metadata": {
+              "title": "FAIR Guiding Principles for scientific data management and stewardship",
+              "authors": [
+                "GoFair"
+              ],
+              "year": 2016,
+              "kind": "article",
+              "language": "en",
+              "container": "University of the Witwatersrand, Johannesburg Institutional Repository on DSpace (University of the Witwatersrand, Johannesburg)",
+              "publisher": "University of the Witwatersrand",
+              "doi": null,
+              "isbn": null,
+              "url": "https://hdl.handle.net/10539/49963"
+            }
+          },
+          {
+            "id": "openalex:4",
+            "rank": 4,
+            "metadata": {
+              "title": "The FAIR Guiding Principles for scientific data management and stewardship",
+              "authors": [
+                "Mark Denis Wilkinson",
+                "Michel Dumontier",
+                "IJsbrand Jan Aalbersberg",
+                "Gabrielle Appleton",
+                "Myles Axton",
+                "Arie Baak",
+                "Niklas Blomberg",
+                "Jan‐Willem Boiten",
+                "Luiz Bonino da Silva Santos",
+                "Philip E. Bourne",
+                "Jildau Bouwman",
+                "Anthony J. Brookes",
+                "Tim Clark",
+                "Mercè Crosas",
+                "Ingrid Dillo",
+                "Olivier Dumon",
+                "Scotr Edmunds",
+                "Chris T. Evelo",
+                "Richard Finkers",
+                "Alejandra N Gonzalez-Beltran",
+                "Alasdair J. G. Gray",
+                "Paul Groth",
+                "Carole Goble",
+                "Jeffrey Sean Grethe",
+                "Jaap Heringa",
+                "Peter-Bram 't Hoen",
+                "Rob W W Hooft",
+                "Tobias Kuhn",
+                "Ruben G. Kok",
+                "Joost N. Kok",
+                "Scott J. Lusher",
+                "Maryann E. Martone",
+                "Albert Mons",
+                "Abel Laerte Packer",
+                "Bengt Persson",
+                "Philippe Rocca‐Serra",
+                "Marco Roos",
+                "René van Schaik",
+                "Susanna‐Assunta Sansone",
+                "Erik Schultes",
+                "Thierry Sengstag",
+                "Ted Slater",
+                "George Strawn",
+                "Morris A. Swertz",
+                "Mark Thompson",
+                "Johan van der Lei",
+                "Erik M. van Mulligen",
+                "Jan Velterop",
+                "Andra Waagmeester",
+                "Peter Wittenburg",
+                "Katherine Wolstencroft",
+                "Jun Zhao",
+                "Barend Mons"
+              ],
+              "year": 2016,
+              "kind": "article",
+              "language": "en",
+              "container": "Hispana",
+              "publisher": "",
+              "doi": null,
+              "isbn": null,
+              "url": "https://oa.upm.es/45762/"
+            }
+          },
+          {
+            "id": "openalex:5",
+            "rank": 5,
+            "metadata": {
+              "title": "Faculty Opinions recommendation of The FAIR Guiding Principles for scientific data management and stewardship.",
+              "authors": [
+                "Stefan Schulz"
+              ],
+              "year": 2018,
+              "kind": "other",
+              "language": "en",
+              "container": "Faculty Opinions – Post-Publication Peer Review of the Biomedical Literature",
+              "publisher": "",
+              "doi": "10.3410/f.726216348.793543848",
+              "isbn": null,
+              "url": "https://doi.org/10.3410/f.726216348.793543848"
+            }
+          }
+        ],
+        "skipped_records": 0
+      },
+      "checks": {
+        "expected_doi_found": true,
+        "title": true,
+        "year": true,
+        "expected_author_surnames": true,
+        "container": true
+      }
+    }
+  ],
+  "provider_differences": [
+    {
+      "doi": "10.1038/171737a0",
+      "fields": [
+        "authors",
+        "publisher"
+      ]
+    },
+    {
+      "doi": "10.1371/journal.pmed.0020124",
+      "fields": [
+        "publisher"
+      ]
+    },
+    {
+      "doi": "10.1038/sdata.2016.18",
+      "fields": [
+        "authors",
+        "publisher"
+      ]
+    }
+  ],
+  "errors": [
+    {
+      "case": "synthetic_missing_doi",
+      "result": {
+        "provider": "crossref",
+        "adapter_version": "1",
+        "checked_at": "2026-11-03T19:57:47.842849+00:00",
+        "status": "unavailable",
+        "code": "record_not_found",
+        "hits": [],
+        "skipped_records": 0
+      },
+      "passed": true
+    },
+    {
+      "case": "invalid_filter",
+      "provider": "crossref",
+      "http_status": 400,
+      "passed": true
+    },
+    {
+      "case": "synthetic_missing_doi",
+      "result": {
+        "provider": "openalex",
+        "adapter_version": "1",
+        "checked_at": "2026-11-03T19:57:52.554193+00:00",
+        "status": "completed",
+        "code": "no_results",
+        "hits": [],
+        "skipped_records": 0
+      },
+      "passed": true
+    },
+    {
+      "case": "invalid_filter",
+      "provider": "openalex",
+      "http_status": 400,
+      "passed": true
+    }
+  ],
+  "complete": false
+}
