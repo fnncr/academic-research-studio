@@ -62,3 +62,13 @@ DOCX извлекается в порядке основных абзацев и
 FastAPI обслуживает API; React/TypeScript с Vite — интерфейс. `python-docx` (MIT) читает DOCX; `pypdf` (BSD-3-Clause) извлекает PDF-текст без внешних исполняемых программ; `defusedxml` (PSF) отклоняет DTD/entities до обработки DOCX. Прямые зависимости интерфейса React/Vite/TypeScript используют MIT/Apache-2.0. Версии Python-зависимостей закреплены в `backend/requirements.txt`, JavaScript — в `frontend/package-lock.json`. Лицензии поставляются в установленных пакетах; это техническая проверка совместимости, не юридическое заключение.
 
 Требования редакторской проверки находятся в `docs/editorial-criteria.md`. Эта версия их не исполняет и не оценивает происхождение текста или результаты антиплагиата.
+
+## Реестр редакторских критериев (P0)
+
+Добавлен [JSON-реестр 1.0.0](backend/app/data/editorial-criteria.v1.json) всех 34 критериев со строгими Pydantic-схемами и тестами соответствия Markdown. В исходнике исправлена нумерация внутри пункта 32. Реестр пока не анализирует документы.
+
+```bash
+(cd backend && ../.venv/bin/python -m app.editorial_registry)
+```
+
+[Формат, проверка и версионирование](docs/editorial-registry.md). [Неоднозначности](docs/editorial-ambiguities.md), включая отсутствующие в источнике description, зафиксированы явно; новые условия проверки не добавлены.
