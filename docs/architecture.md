@@ -194,3 +194,10 @@ Pydantic-схемы задают обязательные поля, ограни
 ## Дополнение P4a
 
 [Первая серверная поставка P4](evidence.md) реализует неизменяемые фрагменты Evidence и атомарные версии Claim/Citation на точной ManuscriptRevision. Реальные FK закрепляют версии источников и использованные Evidence. Интерфейс P4 и научное подтверждение пока не реализованы. Повторная проверка каталогов после PR #7 доступна в sources.md: оба API отвечают через штатный прокси, но complete:false из-за top-5 Crossref; P3 полностью не проверен.
+
+## P6 foundation design
+
+The current P6 contract supersedes the generic retry guidance above for paid
+model calls: [P6 architecture](p6-architecture.md), [ADR 0006](adr/0006-model-jobs-and-grounded-proposals.md).
+Ambiguous dispatches must never be automatically requeued. This is not a claim
+that the complete AI assistant or semantic verification has been delivered.
