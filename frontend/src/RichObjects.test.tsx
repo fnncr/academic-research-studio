@@ -19,3 +19,7 @@ it('merges a rectangle without dropping IDs or nonempty cell content', () => {
  const next=mergeRectangle(table,0,0,1,1); expect(next.rows.flatMap(r=>r.cells.map(c=>c.id))).toEqual(ids); expect(next.rows[1].cells[1].covered_by).toBe(ids[0]);
  table.rows[1].cells[1].text='Не терять'; expect(()=>mergeRectangle(table,0,0,1,1)).toThrow();
 });
+it('edits the caption of a saved image preserving its bytes and UUID', async () => {
+ const block={id:'im1',type:'image' as const,png_base64:'',text:'',alt:'',width_cm:4}; const change=vi.fn();render(<ManuscriptBlock block={block} change={change} index={1}/>);
+ await userEvent.setup().type(screen.getByLabelText('Подпись рисунка'),'А');expect(change).toHaveBeenLastCalledWith({...block,text:'А'});
+});

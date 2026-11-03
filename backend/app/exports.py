@@ -19,7 +19,7 @@ from app.projects import DB, get_project, problem
 from app.source_schema import SourceMetadata
 
 router = APIRouter(prefix='/api/projects/{project_id}/exports', tags=['exports'])
-GENERATOR_VERSION = 'docx-4-merged-cells'
+GENERATOR_VERSION = 'docx-5-rich-objects'
 slots = threading.BoundedSemaphore(2)
 
 
@@ -119,6 +119,10 @@ def preflight(db, project_id, body):
     cited_nodes = {str(c.block_id) for c in plan_document.citations} if plan_document else set()
     previous_level = 0
     for block in document['blocks']:
+        if block['type'] in ('formula', 'footnote') and not block['text'].strip():
+            add('errors', 'empty_rich_object', 'Заполните текст формулы или сноски.', block_id=block['id'])
+        if block['type'] == 'image' and not block['alt'].strip():
+            add('warnings', 'image_without_alt', 'Добавьте описание изображения для доступности.', block_id=block['id'])
         if block['type'] == 'citation_placeholder':
             add('errors', 'unresolved_citation', 'Незаполненная заготовка ссылки. Замените её проверенной citation-связью в P4.', block_id=block['id'])
         elif block['type'] == 'heading':
@@ -135,7 +139,7 @@ def preflight(db, project_id, body):
         add('warnings', 'tight_layout', 'Крупный шрифт или узкая полоса текста могут ухудшить переносы и таблицы.')
     if body.profile.toc:
         add('info', 'toc_update', 'В Word обновите оглавление и поля (Ctrl+A, F9). Номера страниц вычисляет офисный редактор.')
-    add('info', 'unsupported_objects', 'Модель P2 не содержит рисунков и подписей. Эти объекты не создаются.')
+    add('info', 'unsupported_objects', 'Поддержаны PNG RGB/RGBA, линейные формулы Word, сноски и прямоугольные объединения. SVG/JPEG, LaTeX, сложные матрицы и произвольные объекты не поддержаны.')
     add('info', 'format_scope', 'Числовой стиль numeric-v1 и пользовательский профиль не заявляют соответствия ГОСТ или стандарту университета. Для точного титула нужен образец.')
     add('info', 'manual_reference_scope', 'Проверяются структурированные citations P4. Вручную набранные ссылки и библиографические строки не распознаются автоматически.')
     add('info', 'font_availability', 'Для одинаковой вёрстки в Word должен быть установлен выбранный шрифт.')

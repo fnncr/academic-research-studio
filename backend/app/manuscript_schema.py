@@ -60,6 +60,20 @@ class Table(Node):
         return self
 
 
+class Image(Node):
+    type: Literal['image']
+    png_base64: Annotated[str, StringConstraints(strict=True, max_length=700000)]
+    text: Label = ''  # Caption is a normal, P4-addressable text node.
+    alt: Label = ''
+    width_cm: Annotated[float, Field(strict=True, ge=1, le=18)] = 12
+
+    @model_validator(mode='after')
+    def valid_png(self):
+        from app.png_images import read_png
+        read_png(self.png_base64)
+        return self
+
+
 class MergeCell(Cell):
     row_span: Annotated[int, Field(strict=True, ge=1, le=100)] = 1
     col_span: Annotated[int, Field(strict=True, ge=1, le=20)] = 1
@@ -118,7 +132,7 @@ class CitationPlaceholder(Node):
     locator: Label = ''
 
 
-Block = Annotated[Paragraph | Heading | Quote | ListBlock | Table | CitationPlaceholder | Formula | Footnote | MergedTable,
+Block = Annotated[Paragraph | Heading | Quote | ListBlock | Table | CitationPlaceholder | Formula | Footnote | MergedTable | Image,
                   Field(discriminator='type')]
 
 
@@ -128,7 +142,7 @@ class ManuscriptDocument(StrictModel):
 
     @model_validator(mode='after')
     def safe_tree(self):
-        if self.schema_version == '1' and any(b.type in ('formula', 'footnote', 'merged_table') for b in self.blocks):
+        if self.schema_version == '1' and any(b.type in ('formula', 'footnote', 'merged_table', 'image') for b in self.blocks):
             raise ValueError('New objects require schema 2')
         ids = set()
         characters = 0
@@ -141,7 +155,7 @@ class ManuscriptDocument(StrictModel):
                         raise ValueError('Every node ID must be unique')
                     ids.add(value['id'])
                 for key, item in value.items():
-                    if key in {'text', 'label', 'locator'}:
+                    if key in {'text', 'label', 'locator', 'alt'}:
                         characters += len(item)
                         if '\0' in item or any(0xD800 <= ord(char) <= 0xDFFF for char in item):
                             raise ValueError('Invalid Unicode text')
@@ -168,6 +182,8 @@ class ManuscriptDocument(StrictModel):
                 target = targets.get(str(anchor.block_id))
                 if not target or target.get('type') == 'footnote' or utf16_slice(target['text'], anchor.start, anchor.end) != anchor.quote:
                     raise ValueError('Footnote anchor is stale or invalid')
+        if sum(len(b.png_base64) for b in self.blocks if b.type == 'image') > 1500000:
+            raise ValueError('Total image payload exceeds manuscript budget')
         if len(ids) > 2000 or characters > 250000:
             raise ValueError('Document exceeds node or text limit')
         return self

@@ -1,3 +1,4 @@
+import ImageFields from './ImageFields';
 import MergedTableFields from './MergedTableFields';
 import FootnoteFields from './FootnoteFields';
 import { cell, paragraph, type Block, type Paragraph, type ManuscriptDocument } from './manuscript';
@@ -10,6 +11,7 @@ function ParagraphFields({ block, change, label }: { block: Paragraph; change: (
 
 export default function ManuscriptBlock({ block, change, index, document }: { block: Block; change: (value: Block) => void; index: number; document?: ManuscriptDocument }) {
   switch (block.type) {
+    case 'image': return <ImageFields block={block} change={change} />;
     case 'merged_table': return <MergedTableFields block={block} change={change} />;
     case 'footnote': return <FootnoteFields block={block} document={document} change={change} />;
     case 'formula': return <><p>Линейная запись Unicode, не LaTeX. В Word экспортируется редактируемая формула.</p><label>Текст формулы<textarea maxLength={20000} value={block.text} onChange={e => change({ ...block, text: e.target.value })} /></label><div aria-label="Предпросмотр формулы">{block.text}</div></>;
