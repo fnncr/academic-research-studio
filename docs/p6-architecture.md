@@ -230,3 +230,15 @@ Error taxonomy: `not_found`, `request_conflict`, `consent_mismatch`,
 `ambiguous_outcome`, `invalid_result`, `revision_conflict`, `review_required`.
 No public API until transport limits, authentication deployment boundary and
 provider-specific billing/consent behavior have integration tests.
+
+## Implementation notes
+
+The delivered budget row also has `blocked`: a response exceeding the reserved
+billing bound leaves the job ambiguous and freezes subsequent reservations and
+dispatches for that project. A corrected late receipt may settle the job but does
+not silently clear this flag. Audited operational unfreeze and real invoice
+investigation belong to Task A. Settlement token counts are null when unknown,
+not invented zeros. Pre-dispatch cancellation records known zero usage; an owner
+full-reserve closure is labelled as such, not presented as a provider invoice.
+The first service is internal and mock-only; implementation boundaries and
+follow-up acceptance criteria are in [the Sol handoff](p6-implementation-handoff.md).
