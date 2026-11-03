@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, it, expect, vi } from 'vitest';
-import App from './App';
+import App from './Upload';
 
 describe('document upload', () => {
   it('uploads a file and displays extracted content as text', async () => {

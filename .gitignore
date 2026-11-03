@@ -223,3 +223,6 @@ __marimo__/
 node_modules/
 dist/
 coverage/
+
+# Local PostgreSQL backups
+*.dump
