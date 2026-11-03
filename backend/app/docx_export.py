@@ -77,9 +77,13 @@ def citation_data(document, plan, evidence):
     return bibliography_ids, by_node
 
 
-def add_text(paragraph, node, citations):
+def add_text(paragraph, node, citations, math=False):
     text = node['text']; marks = node.get('marks', [])
     def run(value):
+        if math:
+            formula = OxmlElement('m:oMath'); r = OxmlElement('m:r'); text_node = OxmlElement('m:t'); text_node.text = value
+            text_node.set(qn('xml:space'), 'preserve'); r.append(text_node); formula.append(r); paragraph._p.append(formula)
+            return
         item = paragraph.add_run(value)
         item.bold = 'bold' in marks if marks else None
         item.italic = 'italic' in marks if marks else None
@@ -176,6 +180,9 @@ def generate_docx(document, plan, evidence, sources, request, report):
             if kind == 'quote':
                 p.paragraph_format.left_indent = Cm(1); p.paragraph_format.right_indent = Cm(1)
             add_text(p, block, citations)
+        elif kind == 'formula':
+            p = doc.add_paragraph(); p.alignment = WD_ALIGN_PARAGRAPH.CENTER; p.paragraph_format.first_line_indent = Cm(0)
+            add_text(p, block, citations, math=True)
         elif kind == 'list':
             num_id = numbering(doc, block['ordered'])
             for item in block['items']:

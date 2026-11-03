@@ -60,22 +60,29 @@ class Table(Node):
         return self
 
 
+class Formula(Node):
+    type: Literal['formula']
+    text: Text
+
+
 class CitationPlaceholder(Node):
     type: Literal['citation_placeholder']
     label: Label
     locator: Label = ''
 
 
-Block = Annotated[Paragraph | Heading | Quote | ListBlock | Table | CitationPlaceholder,
+Block = Annotated[Paragraph | Heading | Quote | ListBlock | Table | CitationPlaceholder | Formula,
                   Field(discriminator='type')]
 
 
 class ManuscriptDocument(StrictModel):
-    schema_version: Literal['1']
+    schema_version: Literal['1', '2']
     blocks: list[Block] = Field(max_length=1000)
 
     @model_validator(mode='after')
     def safe_tree(self):
+        if self.schema_version == '1' and any(b.type == 'formula' for b in self.blocks):
+            raise ValueError('New objects require schema 2')
         ids = set()
         characters = 0
 
