@@ -39,7 +39,8 @@ P2–P5 manual workflows remain available without model keys.
 **Dependency / branch:** after foundation, branch `feat/p6-gateway-api`.
 Read model_jobs/contracts/gateway/worker and p6-architecture.md end to end.
 
-**Allowed files:** these five modules; new `app/model_api.py`,
+**Allowed files:** `model_jobs.py`, `model_contracts.py`, `model_gateway.py`,
+`model_worker.py`, additive audit tables in `models.py`; new `app/model_api.py`,
 `app/model_adapters/` (one explicitly approved provider), `main.py` router wiring;
 additive migrations after 0005 if required for actor/consent/reconciliation audit;
 new tests, runtime configuration example, compose worker service and docs.
@@ -50,7 +51,8 @@ replacement schema. No new queue framework or broker.
 **Work:** expose the planned project-scoped preview/enqueue/read/cancel/result/
 accept/reconcile API. Authenticate the owner at the deployment boundary; retain
 project predicates for every read/write. Bound request/response bytes and time,
-map domain errors to safe codes, no-store, no raw Pydantic input echoes. Record
+map domain errors to safe codes, no-store, no raw Pydantic input echoes. Internal lease/fencing tokens must not be exposed
+in public job responses. Record
 consent actor/time, exact preview hash and provider retention disclosure. Current
 service accepts explicit Consent but has no actor identity; do not expose it as
 sufficient for a multi-user deployment. Reconciliation must require owner decision
