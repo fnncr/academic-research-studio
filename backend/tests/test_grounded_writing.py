@@ -83,6 +83,8 @@ def test_semantic_review_is_separate_costed_immutable_and_not_acceptable_as_text
     enqueue(q,p,task); review=run_once(q)
     assert review['state']=='succeeded' and review['result']['status']=='uncertain'
     assert review['result']['result_hash']==digest(source['result'])
+    assert review['report']['reviewed_job_id']==str(source['id'])
+    assert review['report']['provenance']['plan']==str(s.plan_revision_id)
     assert all(f['outcome']=='uncertain' and f['limitations'] for f in review['result']['findings'])
     assert budget(q,p)[2]==200
     assert q.read(p,source['id'])['report']['semantic']=='uncertain'

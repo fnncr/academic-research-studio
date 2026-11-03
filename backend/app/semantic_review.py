@@ -56,4 +56,10 @@ def validate_review(packet, raw):
     if not expected: require(review.status=='insufficient_data', 'insufficient_evidence')
     return review, {'structural':'structurally_valid', 'semantic':review.status,
                     'scientific_verification':'unverified', 'reviewed_result_hash':review.result_hash,
-                    'context_hash':review.context_hash, 'review_version':review.reviewer_version}
+                    'context_hash':review.context_hash, 'review_version':review.reviewer_version,
+                    'reviewed_job_id':packet['review_subject']['job_id'],
+                    'provenance': {'review_contract':packet['review_contract'],
+                        'policy_version':packet['policy_version'],
+                        'brief':packet['brief']['id'], 'plan':packet['plan']['id'],
+                        'manuscript':packet['manuscript']['id'],
+                        'source_hashes':{k:v['hash'] for k,v in packet['source_versions'].items()}}}
