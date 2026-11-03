@@ -37,10 +37,17 @@ class TaskSpec(Contract):
     instruction: Text
     provider: Literal['mock'] = 'mock'
     model: Literal['mock-grounded-v1'] = 'mock-grounded-v1'
+    kind: Literal['writing', 'semantic_review'] = 'writing'
+    review_job_id: UUID | None = None
+    review_result_hash: Hash | None = None
     max_output_tokens: Annotated[int, Field(strict=True, ge=256, le=8000)] = 2000
 
     @model_validator(mode='after')
     def distinct_claims(self):
+        if self.kind == 'semantic_review':
+            if self.review_job_id is None or self.review_result_hash is None: raise ValueError('Review subject required')
+        elif self.review_job_id is not None or self.review_result_hash is not None:
+            raise ValueError('Writing task cannot carry a review subject')
         if len(set(self.claim_ids)) != len(self.claim_ids): raise ValueError('Duplicate claim')
         return self
 
@@ -127,4 +134,16 @@ class AcceptanceSpec(Contract):
     @classmethod
     def explicit_boolean(cls, value):
         if value is not True: raise ValueError('Explicit approval required')
+        return value
+
+
+class HumanReviewSubmission(Contract):
+    request_id: UUID
+    review: SemanticReview
+    acknowledged: Literal[True]
+
+    @field_validator('acknowledged', mode='before')
+    @classmethod
+    def explicit_review(cls, value):
+        if value is not True: raise ValueError('Explicit human review required')
         return value
