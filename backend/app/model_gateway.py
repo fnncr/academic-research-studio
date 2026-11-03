@@ -35,7 +35,14 @@ class AmbiguousOutcome(Exception):
 
 
 def messages(packet, spec):
-    return [{'role': 'system', 'content': SYSTEM_RULES},
+    from app.grounded_writing import PROMPT, prompt_manifest
+    require(packet.get('writing_contract') == prompt_manifest(), 'prompt_changed')
+    prompt = PROMPT
+    if spec.kind == 'semantic_review':
+        from app.semantic_review import REVIEW_PROMPT, review_manifest
+        require(packet.get('review_contract') == review_manifest(), 'prompt_changed')
+        prompt = REVIEW_PROMPT
+    return [{'role': 'system', 'content': SYSTEM_RULES+' '+prompt},
             {'role': 'user', 'content': json.dumps({'task': spec.model_dump(mode='json'),
                                                   'research_data': packet}, ensure_ascii=False, sort_keys=True)}]
 
@@ -54,20 +61,14 @@ class MockGateway:
     def generate(self, packet, spec, dispatch_id):
         self.calls += 1
         if self.mode == 'timeout': raise AmbiguousOutcome()
-        assessments = []
-        gaps = []
-        for claim in packet['plan']['claims']:
-            supported = any(e['relation'] == 'supports' for e in claim['evidence'])
-            assessments.append({'claim_id': claim['id'], 'status': 'needs_review' if supported else 'insufficient_evidence',
-                'explanation': 'Mock: требуется проверка автором.', 'evidence': [
-                    {'evidence_id': e['evidence_id'], 'relation': e['relation'], 'explanation': 'Связь сохранена без вывода о достоверности.'}
-                    for e in claim['evidence']]})
-            if not supported: gaps.append({'claim_id': claim['id'], 'explanation': 'Недостаточно подтверждающих доказательств.'})
-        result = {'schema_version': '1', 'context_hash': digest(packet),
-                  'paragraphs': ['Тестовое предложение: требуется анализ доказательств автором.'],
-                  'claims': assessments, 'citations': [], 'research_gaps': gaps,
-                  'warnings': ['Mock не выполняет научную генерацию.'], 'verification': 'unverified'}
+        if spec.kind == 'semantic_review':
+            from app.semantic_review import local_review
+            result = local_review(packet, spec)
+        else:
+            from app.grounded_writing import compose
+            result = compose(packet, spec)
         return GatewayReply(result, 100, 50, 50)
+
 
 
 class GatewayUnavailable(ValueError):

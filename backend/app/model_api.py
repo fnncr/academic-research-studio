@@ -14,7 +14,7 @@ from starlette.concurrency import run_in_threadpool
 from starlette.requests import ClientDisconnect
 from starlette.responses import JSONResponse
 
-from app.model_contracts import Contract, TaskSpec, Consent, AcceptanceSpec, Short, Units
+from app.model_contracts import Contract, TaskSpec, Consent, AcceptanceSpec, HumanReviewSubmission, Short, Units
 from app.model_context import ModelProblem
 from app.model_jobs import ModelJobs
 from app.projects import problem
@@ -173,3 +173,10 @@ async def reconcile(project_id: UUID, job_id: UUID, request: Request):
     body = await payload(request,Reconcile)
     response = await call(request,'reconcile',project_id,job_id,body.charged_units,body.reason,actor='owner',decision=body)
     return public(json.loads(response.body))
+
+
+@router.post('/{job_id}/human-review')
+async def human_review(project_id: UUID, job_id: UUID, request: Request):
+    response = await call(request,'human_review',project_id,job_id,
+        await payload(request,HumanReviewSubmission),actor='owner')
+    return public(json.loads(response.body),result=True)

@@ -113,3 +113,9 @@ optional Compose `models` profile. Set `MODEL_OWNER_TOKEN` for the API; all mode
 providers remain mock-only until a real provider is approved. Manual workflows
 remain available when model API is disabled. See the runbook for the personal
 single-owner deployment boundary and explicit limits of these checks.
+
+[P6 Task B](docs/p6-task-b.md) adds deterministic Evidence-grounded section
+composition, complete contradiction/limit accounting, bibliography diagnostics,
+versioned prompts and separate semantic-review jobs. The local reviewer reports
+uncertainty; owner-authenticated human reviews need no model execution or budget.
+Real LLM generation/review remains disabled pending provider approval.

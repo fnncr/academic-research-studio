@@ -53,6 +53,12 @@ class ModelJobs:
 
     def _preview(self, db, project_id, spec):
         packet = assemble_context(db, project_id, spec)
+        if spec.kind == 'writing':
+            from app.grounded_writing import compose
+            compose(packet, spec)  # Output capacity fails before reserving a budget.
+        else:
+            from app.semantic_review import local_review
+            local_review(packet, spec)
         quote = asdict(MockGateway().quote(packet, spec))
         data = {'task': spec.model_dump(mode='json'), 'context': packet, 'quote': quote,
                 'disclosure': 'mock-local-v1: no external transmission or provider retention'}
@@ -187,9 +193,17 @@ class ModelJobs:
                 job.report = {'code': 'cancelled_after_dispatch'}
             else:
                 try:
-                    proposal, report = validate_proposal(db, project_id, spec, job.input_json['context'], reply.result)
+                    if spec.kind == 'semantic_review':
+                        from app.semantic_review import validate_review
+                        require(assemble_context(db, project_id, spec) == job.input_json['context'], 'context_changed')
+                        proposal, report = validate_review(job.input_json['context'], reply.result)
+                        require(proposal.reviewer_kind == 'model', 'model_reviewer_required')
+                    else:
+                        proposal, report = validate_proposal(db, project_id, spec, job.input_json['context'], reply.result)
                     require(reply.input_tokens <= job.input_json['quote']['input_token_bound'] and
                             reply.output_tokens <= spec.max_output_tokens, 'usage_limit_exceeded')
+                    report['execution'] = {'quote': job.input_json['quote'],
+                        'input_tokens': reply.input_tokens, 'output_tokens': reply.output_tokens}
                     job.result = proposal.model_dump(mode='json'); job.report = report; job.state = 'succeeded'
                 except (ValueError, ValidationError):
                     job.state = 'invalid'; job.report = {'code': 'invalid_result', 'semantic': 'uncertain'}
@@ -247,6 +261,7 @@ class ModelJobs:
                 request.manuscript_revision_id == current.id == job.manuscript_revision_id and
                 request.plan_revision_id == plan.id == job.plan_revision_id, 'revision_conflict')
             spec = TaskSpec.model_validate(job.input_json['task'])
+            require(spec.kind == 'writing', 'review_not_acceptable_as_text')
             proposal, _ = validate_proposal(db, project_id, spec, job.input_json['context'], job.result)
             document = deepcopy(current.document)
             document['blocks'].append({'id': str(uuid5(job.id, 'heading')), 'type': 'heading', 'text': spec.title, 'level': 1})
@@ -350,3 +365,33 @@ class ModelJobs:
             require(job.state == 'leased' and job.lease_token == token and job.dispatch_id is None, 'stale_lease')
             job.state = 'queued'; job.lease_token = None; job.lease_until = None
             return view(job)
+
+
+    def human_review(self, project_id, source_job_id, submission, actor):
+        from app.semantic_review import validate_review
+        with Session(self.engine) as db, db.begin():
+            source = self._lock(db, project_id, source_job_id)
+            fingerprint = digest({'subject_job_id': str(source_job_id), 'actor': actor,
+                                  'submission': submission.model_dump(mode='json')})
+            old = db.scalar(select(ModelJob).where(ModelJob.project_id==project_id, ModelJob.request_id==submission.request_id))
+            if old:
+                require(old.fingerprint==fingerprint, 'request_conflict')
+                return view(old)
+            task = dict(source.input_json['task'], request_id=str(submission.request_id),
+                kind='semantic_review', review_job_id=str(source.id), review_result_hash=digest(source.result))
+            spec = TaskSpec.model_validate(task)
+            packet = assemble_context(db, project_id, spec)
+            require(submission.review.reviewer_kind == 'human', 'human_reviewer_required')
+            review, report = validate_review(packet, submission.review.model_dump(mode='json'))
+            record = ModelJob(project_id=project_id, request_id=submission.request_id, fingerprint=fingerprint,
+                brief_revision_id=spec.brief_revision_id, manuscript_revision_id=spec.manuscript_revision_id,
+                plan_revision_id=spec.plan_revision_id, input_json={'task':spec.model_dump(mode='json'),
+                    'context':packet, 'disclosure':'human-local-v1: no model invocation'},
+                reserved_units=0, state='succeeded', cancel_requested=False,
+                result=review.model_dump(mode='json'), report=report)
+            db.add(record); db.flush()
+            db.add(ModelSettlement(job_id=record.id, project_id=project_id, charged_units=0,
+                input_tokens=0, output_tokens=0, reason='human_review_no_model'))
+            self._audit(db, project_id, record.id, 'human_review', submission.request_id, actor,
+                {'subject_job_id':str(source.id), 'result_hash':review.result_hash, 'review_hash':digest(record.result)})
+            return view(record)
