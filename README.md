@@ -119,3 +119,9 @@ composition, complete contradiction/limit accounting, bibliography diagnostics,
 versioned prompts and separate semantic-review jobs. The local reviewer reports
 uncertainty; owner-authenticated human reviews need no model execution or budget.
 Real LLM generation/review remains disabled pending provider approval.
+
+[P6 Task C: AI Research Assistant](docs/p6-task-c.md) is available from the manual
+manuscript editor. It previews saved research context, requires request-specific
+consent, tracks/reopens jobs and safely accepts appended sections. The provider
+remains a local mock/template composer. The owner token stays in memory; per-tab
+request UUIDs/settings survive refresh without storing source excerpts or keys.

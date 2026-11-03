@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState, type ChangeEvent } from 'react';
+import ModelAssistant from './ModelAssistant';
 import ExportPanel from './ExportPanel';
 import EvidenceWorkspace from './EvidenceWorkspace';
 import ManuscriptBlock from './ManuscriptBlock';
@@ -18,6 +19,10 @@ export function ManuscriptDiff({ before, after }: { before: ManuscriptDocument; 
 }
 
 export default function Manuscript({ projectId, onDirty }: { projectId: string; onDirty: (dirty: boolean) => void }) {
+  const [assistantOpen, setAssistantOpen] = useState(false);
+  const [assistantBusy, setAssistantBusy] = useState(false);
+  const reportAssistantBusy = useCallback((value: boolean) => setAssistantBusy(value), []);
+  const latestDirty = useRef(false);
   const [exportOpen, setExportOpen] = useState(false);
   const [exportDirty, setExportDirty] = useState(false);
   const reportExportDirty = useCallback((value: boolean) => setExportDirty(value), []);
@@ -42,8 +47,9 @@ export default function Manuscript({ projectId, onDirty }: { projectId: string; 
   const [showDiff, setShowDiff] = useState(false);
   const pending = useRef<{ fingerprint: string; requestId: string } | null>(null);
   const dirty = loaded && (!sameDocument(draft, base?.document ?? emptyDocument()) || restoredFrom !== null);
+  latestDirty.current = dirty || evidenceDirty;
   const issue = documentProblem(draft);
-  useEffect(() => { onDirty(dirty || evidenceDirty || exportDirty || busy && loaded); }, [dirty, evidenceDirty, exportDirty, busy, loaded, onDirty]);
+  useEffect(() => { onDirty(dirty || evidenceDirty || exportDirty || assistantBusy || busy && loaded); }, [dirty, evidenceDirty, exportDirty, assistantBusy, busy, loaded, onDirty]);
   useEffect(() => {
     const guard = (event: BeforeUnloadEvent) => { if (dirty || busy && loaded) { event.preventDefault(); event.returnValue = ''; } };
     window.addEventListener('beforeunload', guard);
@@ -103,14 +109,14 @@ export default function Manuscript({ projectId, onDirty }: { projectId: string; 
   return <section className="card manuscript"><h2>Рукопись</h2><p>Ручной план и текст. Сохранение создаёт новую версию; модель и внешние сервисы не используются.</p>
     <p>{base ? `Сохранённая версия ${base.number}` : 'Рукопись ещё не сохранена'}{dirty ? ' · Есть несохранённые изменения' : ''}</p>
     {error && <p role="alert" className="error">{error}</p>}{issue && <p role="alert">{issue}</p>}{status && <p role="status">{status}</p>}{busy && <p role="status">Обработка рукописи…</p>}
-    <button disabled={busy} onClick={() => run(reload)}>{loaded ? 'Проверить актуальную версию' : 'Повторить загрузку рукописи'}</button>
+    <button disabled={busy || assistantBusy} onClick={() => run(reload)}>{loaded ? 'Проверить актуальную версию' : 'Повторить загрузку рукописи'}</button>
     {conflict && <p role="alert">Черновик не заменён. Загрузите актуальную версию и сравните изменения. Автоматического объединения нет.</p>}
     {remote !== undefined && <section className="conflict"><h3>Актуальная версия {remote?.number ?? 'отсутствует'} и ваш черновик</h3><ManuscriptDiff before={remote?.document ?? emptyDocument()} after={draft} />
       <p>При сохранении черновик станет новой полной версией. Перенесите нужные изменения из актуального текста перед продолжением.</p>
-      <button disabled={busy} onClick={() => { setBase(remote); setRemote(undefined); setConflict(false); pending.current = null; }}>Сравнение выполнено: сохранить мой черновик поверх актуальной версии</button>
+      <button disabled={busy || assistantBusy} onClick={() => { setBase(remote); setRemote(undefined); setConflict(false); pending.current = null; }}>Сравнение выполнено: сохранить мой черновик поверх актуальной версии</button>
       <p className="privacy">Это действие выбирает основу; запись выполняется отдельной кнопкой сохранения.</p>
-      <button disabled={busy} onClick={() => { edit(remote?.document ?? emptyDocument()); setBase(remote); setRemote(undefined); setConflict(false); }}>Взять актуальный текст в редактор</button></section>}
-    {loaded && <><fieldset disabled={busy}><div className="editor-actions"><button type="button" disabled={(!dirty && base !== null) || !!issue || conflict} onClick={() => run(save)}>Сохранить версию рукописи</button>
+      <button disabled={busy || assistantBusy} onClick={() => { edit(remote?.document ?? emptyDocument()); setBase(remote); setRemote(undefined); setConflict(false); }}>Взять актуальный текст в редактор</button></section>}
+    {loaded && <><fieldset disabled={busy || assistantBusy}><div className="editor-actions"><button type="button" disabled={(!dirty && base !== null) || !!issue || conflict} onClick={() => run(save)}>Сохранить версию рукописи</button>
       <button type="button" disabled={!undo.length} onClick={() => { setRedo([...redo, draft]); setDraft(undo.at(-1)!); setUndo(undo.slice(0, -1)); setRestoredFrom(null); }}>Отменить изменение</button>
       <button type="button" disabled={!redo.length} onClick={() => { setUndo([...undo, draft]); setDraft(redo.at(-1)!); setRedo(redo.slice(0, -1)); setRestoredFrom(null); }}>Повторить изменение</button>
       <button type="button" onClick={() => setShowDiff(!showDiff)}>Сравнить с сохранённой версией</button></div>
@@ -123,12 +129,17 @@ export default function Manuscript({ projectId, onDirty }: { projectId: string; 
     </fieldset>{hasImports && <p role="note">{importWarning}</p>}
     {showDiff && <section><h3>Изменения относительно сохранённой версии</h3><ManuscriptDiff before={base?.document ?? emptyDocument()} after={draft} /></section>}
     <details><summary>Предпросмотр текста</summary>{draft.blocks.map(block => <pre key={block.id}>{describeBlock(block)}</pre>)}</details>
-    <section><h3>История рукописи</h3><ol>{history.map(revision => <li key={revision.id}><button disabled={busy} onClick={() => run(async () => setCompared(await api<Revision>(`${path}/revisions/${revision.id}`)))}>Сравнить версию {revision.number}</button> · {new Date(revision.created_at).toLocaleString('ru-RU')}{revision.restored_from_id && ' · восстановление'}</li>)}</ol>
-      {more && <button disabled={busy} onClick={() => run(() => readHistory(true))}>Ещё версии рукописи</button>}
-      {compared && <section><h3>Версия {compared.number} → текущий черновик</h3><ManuscriptDiff before={compared.document} after={draft} /><button disabled={busy} onClick={() => { edit(compared.document); setRestoredFrom(compared.id); setStatus(`Версия ${compared.number} загружена в черновик. Сохраните её новой версией, чтобы завершить восстановление.`); }}>Восстановить версию {compared.number} в черновик</button></section>}
+    <section><h3>История рукописи</h3><ol>{history.map(revision => <li key={revision.id}><button disabled={busy || assistantBusy} onClick={() => run(async () => setCompared(await api<Revision>(`${path}/revisions/${revision.id}`)))}>Сравнить версию {revision.number}</button> · {new Date(revision.created_at).toLocaleString('ru-RU')}{revision.restored_from_id && ' · восстановление'}</li>)}</ol>
+      {more && <button disabled={busy || assistantBusy} onClick={() => run(() => readHistory(true))}>Ещё версии рукописи</button>}
+      {compared && <section><h3>Версия {compared.number} → текущий черновик</h3><ManuscriptDiff before={compared.document} after={draft} /><button disabled={busy || assistantBusy} onClick={() => { edit(compared.document); setRestoredFrom(compared.id); setStatus(`Версия ${compared.number} загружена в черновик. Сохраните её новой версией, чтобы завершить восстановление.`); }}>Восстановить версию {compared.number} в черновик</button></section>}
     </section></>}
-    {base && <><button disabled={busy} onClick={() => setEvidenceOpen(true)}>Открыть научные доказательства</button>{evidenceOpen && <EvidenceWorkspace projectId={projectId} manuscript={base} manuscriptDirty={dirty} onDirty={reportEvidenceDirty} />}</>}
-    <button disabled={busy} onClick={() => setExportOpen(true)}>Открыть экспорт Word</button>{exportOpen && <ExportPanel projectId={projectId} unsaved={dirty || evidenceDirty} onDirty={reportExportDirty} />}
+    {base && <><button disabled={busy || assistantBusy} onClick={() => setEvidenceOpen(true)}>Открыть научные доказательства</button>{evidenceOpen && <EvidenceWorkspace projectId={projectId} manuscript={base} manuscriptDirty={dirty} onDirty={reportEvidenceDirty} />}</>}
+    <button disabled={busy || assistantBusy} onClick={() => setAssistantOpen(true)}>Открыть AI Research Assistant</button>{assistantOpen && <ModelAssistant projectId={projectId} savedId={base?.id} unsaved={dirty || evidenceDirty || busy} onBusy={reportAssistantBusy} onAccepted={async () => {
+      const current = await api<Revision>(path);
+      if (latestDirty.current) { setRemote(current); setConflict(true); return; }
+      setBase(current); setDraft(current.document); setUndo([]); setRedo([]); setRestoredFrom(null); setEvidenceOpen(false); setEvidenceDirty(false); await readHistory();
+    }} />}
+    <button disabled={busy || assistantBusy} onClick={() => setExportOpen(true)}>Открыть экспорт Word</button>{exportOpen && <ExportPanel projectId={projectId} unsaved={dirty || evidenceDirty} onDirty={reportExportDirty} />}
     <p className="privacy">Несохранённый текст хранится только в этой вкладке. Перед закрытием сохраните версию. Автоматических резервных копий пока нет.</p>
   </section>;
 }

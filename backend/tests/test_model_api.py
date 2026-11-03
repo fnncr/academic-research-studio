@@ -211,3 +211,22 @@ def test_enqueue_replay_status(api):
     (q,p,s,c,path,*_),route=api
     assert post_job(c,route,s).status_code==202
     assert post_job(c,route,s).status_code==200
+
+
+def test_ui_recovery_by_uuid_and_immutable_acceptance_receipt(api):
+    (q,p,s,c,path,*_),route=api
+    unknown=c.get(route+'/by-request/'+str(uuid4()))
+    assert unknown.status_code==404
+    job=post_job(c,route,s).json()
+    recovered=c.get(route+'/by-request/'+str(s.request_id))
+    assert recovered.status_code==200 and recovered.json()['id']==job['id']
+    assert recovered.json()['task']['manuscript_revision_id']==str(s.manuscript_revision_id)
+    assert 'lease_token' not in recovered.json()
+    other='/api/projects/'+create(c)['id']+'/model-jobs'
+    assert c.get(other+'/by-request/'+str(s.request_id)).status_code==404
+    result=run_once(q)
+    body=acceptance(s,result['result']).model_dump(mode='json')
+    receipt=c.post(route+'/'+job['id']+'/accept',json=body)
+    assert receipt.status_code==200
+    assert c.get(route+'/'+job['id']).json()['acceptance']['manuscript_revision_id']==receipt.json()['manuscript_revision_id']
+    assert c.post(route+'/'+job['id']+'/accept',json=body).json()==receipt.json()

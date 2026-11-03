@@ -4,3 +4,15 @@ nav{max-width:960px;margin:24px auto 0;padding:0 24px;display:flex;gap:12px;flex
 .source-library{margin-top:24px}.source-library section{margin-top:24px}.source-library details{margin:12px 0}.source-library label{display:block;margin:8px 0}.source-metadata>div{display:grid;grid-template-columns:minmax(100px,1fr) 3fr;gap:12px;margin:8px 0}.source-metadata dt{font-weight:600}.source-metadata dd{margin:0;white-space:pre-wrap;overflow-wrap:anywhere}.metadata-comparison{border-collapse:collapse;width:100%}.metadata-comparison th,.metadata-comparison td{padding:10px;border:1px solid #d7e0d7;white-space:pre-wrap;overflow-wrap:anywhere;text-align:left}
 .evidence-workspace{margin-top:24px;min-width:0}.evidence-workspace label{display:block;margin:8px 0}.evidence-workspace select{display:block;max-width:100%;width:100%;margin:6px 0;white-space:normal}.evidence-workspace article{border-left:3px solid #7b9989;padding-left:16px;margin:16px 0}.evidence-workspace details{margin:12px 0}.evidence-workspace blockquote{margin:12px 0;padding:12px 16px;background:#f3f5f1;white-space:pre-wrap;overflow-wrap:anywhere}.evidence-workspace legend{font-weight:700;margin:16px 0}.evidence-workspace button{margin:4px;max-width:100%}.evidence-workspace [role=alert]{border-left:3px solid #a56d19;padding:12px}.evidence-workspace textarea[readonly]{background:#f3f5f1}
 .export-panel{margin-top:24px}.export-panel label{display:block;margin:8px 0}.export-panel select{display:block;width:100%;max-width:100%;margin:6px 0}.export-panel legend{font-weight:700;margin:16px 0}.export-panel button{margin:6px 4px;max-width:100%}.export-panel [role=alert]{border-left:3px solid #a56d19;padding:12px}.export-panel ul{overflow-wrap:anywhere}
+
+.model-assistant { border-top: 4px solid #24616d; }
+.model-assistant fieldset { display: grid; gap: .8rem; margin: 1rem 0; min-width: 0; }
+.model-assistant label { display: flex; flex-direction: column; gap: .3rem; }
+.model-assistant label:has(input[type=checkbox]) { flex-direction: row; align-items: baseline; }
+.model-assistant pre { white-space: pre-wrap; overflow-wrap: anywhere; max-height: 28rem; overflow: auto; }
+.model-assistant blockquote { border-left: 3px solid #a56f18; padding-left: 1rem; }
+.model-assistant button { margin: .3rem; }
+.model-assistant .diff-columns { align-items: start; }
+.model-assistant input, .model-assistant select { max-width: 100%; }
+.model-assistant button:focus-visible, .model-assistant input:focus-visible, .model-assistant select:focus-visible, .model-assistant summary:focus-visible { outline: 3px solid #24616d; outline-offset: 3px; }
+@media (max-width: 700px) { .model-assistant .diff-columns { display: block; } }

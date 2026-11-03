@@ -1,0 +1,93 @@
+import { useEffect, useRef, useState } from 'react';
+import { api, relations, type Plan, type Evidence } from './evidence';
+import { describeBlock, type Revision, type RevisionSummary } from './manuscript';
+import { modelApi, persist, restore, sha256, type Job, type Pending, type Preview, type Task } from './modelAssistant';
+
+const states: Record<string,string> = { queued:'В очереди', leased:'Подготовка', dispatching:'Выполнение', ambiguous:'Исход неизвестен — резерв удерживается', succeeded:'Результат готов', invalid:'Результат отклонён проверками', cancelled:'Отменено', failed:'Ошибка' };
+export default function ModelAssistant({ projectId, savedId, unsaved, onBusy, onAccepted }: { projectId: string; savedId?: string; unsaved: boolean; onBusy: (v:boolean)=>void; onAccepted: ()=>Promise<void> }) {
+  const path=`/api/projects/${projectId}`; const root=path+'/model-jobs';
+  const [token,setToken]=useState(''); const [connected,setConnected]=useState(false);
+  const [revisions,setRevisions]=useState<RevisionSummary[]>([]); const [plans,setPlans]=useState<Plan[]>([]);
+  const [revision,setRevision]=useState<Revision|null>(null); const [plan,setPlan]=useState<Plan|null>(null); const [brief,setBrief]=useState('');
+  const [section,setSection]=useState(''); const [claims,setClaims]=useState<string[]>([]); const [title,setTitle]=useState(''); const [cap,setCap]=useState(2000);
+  const [evidence,setEvidence]=useState<Evidence[]>([]); const [preview,setPreview]=useState<Preview|null>(null); const [consent,setConsent]=useState(false); const [review,setReview]=useState(false);
+  const [job,setJob]=useState<Job|null>(null); const [history,setHistory]=useState<Job[]>([]); const [budget,setBudget]=useState<{limit_units:number;spent_units:number;reserved_units:number;blocked:boolean}|null>(null);
+  const [limit,setLimit]=useState(100000);
+  const [busy,setBusy]=useState(false); const [error,setError]=useState(''); const [status,setStatus]=useState('');
+  const pending=useRef<Pending>(restore(projectId)); const lock=useRef(false); const alive=useRef(true); const dirty=useRef(unsaved); dirty.current=unsaved;
+  const jobRef=useRef(job); jobRef.current=job;
+  const call=<T,>(suffix:string,body?:unknown)=>modelApi<T>(root+suffix,token,body);
+  function save(next:Pending) { persist(projectId,next); pending.current=next; }
+  async function run(action:()=>Promise<void>) { if(lock.current)return; lock.current=true; setBusy(true); onBusy(true); setError(''); try { await action(); } catch(e) { if(alive.current)setError(e instanceof Error?e.message:'Соединение прервано. UUID сохранён; не создавайте повторное задание.'); } finally { lock.current=false; if(alive.current){setBusy(false);onBusy(false);} } }
+  function invalidate(){setPreview(null);setConsent(false);setReview(false);}
+  useEffect(()=>{alive.current=true;return()=>{alive.current=false;onBusy(false);};},[projectId,onBusy]);
+  useEffect(()=>{invalidate();},[unsaved,savedId]);
+  useEffect(()=>{const guard=(e:BeforeUnloadEvent)=>{if(lock.current){e.preventDefault();e.returnValue='';}};window.addEventListener('beforeunload',guard);return()=>window.removeEventListener('beforeunload',guard);},[]);
+  async function loadJob(id:string){const value=await call<Job>('/'+id+'/result');if(alive.current){setJob(value);setReview(false);if(value.task){const t=value.task;const [r,p]=await Promise.all([api<Revision>(path+'/manuscript/revisions/'+t.manuscript_revision_id),api<Plan>(path+'/research-plan/revisions/'+t.plan_revision_id)]);if(!alive.current)return value;setRevision(r);setPlan(p);setClaims(t.claim_ids);setTitle(t.title);setCap(t.max_output_tokens);const ids=[...new Set(p.document.claims.filter(c=>t.claim_ids.includes(c.id)).flatMap(c=>c.evidence.map(e=>e.evidence_id)))];setEvidence(await Promise.all(ids.map(id=>api<Evidence>(path+'/evidence/'+id))));}}return value;}
+  async function loadSaved(rid:string,pid?:string){
+    const r=await api<Revision>(path+'/manuscript/revisions/'+rid);setRevision(r);
+    const compatible=plans.filter(p=>p.manuscript_revision_id===rid); const selected=pid??compatible[0]?.id;
+    const p=selected?await api<Plan>(path+'/research-plan/revisions/'+selected):null;setPlan(p);setClaims([]);setSection('');setEvidence([]);invalidate();
+    if(p){const ids=[...new Set(p.document.claims.flatMap(c=>c.evidence.map(e=>e.evidence_id)))];setEvidence(await Promise.all(ids.map(id=>api<Evidence>(path+'/evidence/'+id))));}
+  }
+  async function connect(){
+    const [rs,ps,project,b]=await Promise.all([api<RevisionSummary[]>(path+'/manuscript/revisions?limit=100'),api<Plan[]>(path+'/research-plan/revisions?limit=100'),api<{latest_brief:{id:string}}>(path),call<typeof budget>('/budget')]);
+    const capability=await call<{provider:string;external_enabled:boolean}>('/capabilities');if(capability.provider!=='mock'||capability.external_enabled)throw new Error('Конфигурация изменилась: интерфейс допускает только локальный mock.');setRevisions(rs);setPlans(ps);setBrief(project.latest_brief.id);setBudget(b);setConnected(true);setHistory(await call<Job[]>(''));
+    if(pending.current.jobId)await loadJob(pending.current.jobId);
+    else if(pending.current.task){try{const j=await call<Job>('/by-request/'+pending.current.task.request_id);save({...pending.current,jobId:j.id});await loadJob(j.id);}catch{setStatus('Сохранён запрос без подтверждённого ответа. Повтор использует прежний UUID.');}}
+  }
+  useEffect(()=>{if(!connected||!job||!['queued','leased','dispatching','ambiguous'].includes(job.state))return;let active=true;let timer:ReturnType<typeof setTimeout>;let delay=2000;
+    const poll=async()=>{try{const j=await call<Job>('/'+job.id+'/result');if(active){setJob(j);setBudget(await call('/budget'));delay=2000;}}catch{if(active)setError('Статус временно недоступен; повторяется только чтение.');delay=Math.min(delay*2,30000);}if(active)timer=setTimeout(poll,delay);};timer=setTimeout(poll,delay);return()=>{active=false;clearTimeout(timer);};
+  },[connected,job?.id,job?.state,token]);
+  async function moreVersions(kind: 'manuscript'|'research-plan'){
+    if(kind==='manuscript'){const page=await api<RevisionSummary[]>(path+'/manuscript/revisions?limit=100&before='+revisions.at(-1)!.number);setRevisions([...revisions,...page]);}
+    else{const page=await api<Plan[]>(path+'/research-plan/revisions?limit=100&before='+plans.at(-1)!.number);setPlans([...plans,...page]);}
+  }
+  async function check(){
+    let task=pending.current.task;
+    if(!task){if(!revision||!plan||!claims.length)throw new Error('Выберите сохранённые версии и тезисы.');task={request_id:crypto.randomUUID(),brief_revision_id:brief,manuscript_revision_id:revision.id,plan_revision_id:plan.id,claim_ids:claims,title,instruction:'Составить раздел из выбранных Evidence, сохраняя противоречия и научные пробелы.',max_output_tokens:cap,provider:'mock',model:'mock-grounded-v1'};save({task});}
+    const value=await call<Preview>('/preview',task);setPreview(value);setConsent(false);save({...pending.current,fingerprint:value.fingerprint});setBudget(await call('/budget'));
+  }
+  async function send(){if(!preview||!consent||dirty.current)return;const j=await call<Job>('',{task:preview.input.task,consent:{fingerprint:preview.fingerprint,approved:true}});save({...pending.current,jobId:j.id});setJob(j);setConsent(false);setStatus('Задание сохранено. Для выполнения должен работать worker.');}
+  async function accept(){
+    if(dirty.current||!review||!job?.result?.paragraphs)return;
+    let body=pending.current.accept;
+    if(!body){const task=job.task??pending.current.task;if(!task)throw new Error('Перечитайте задание.');const [r,p]=await Promise.all([api<Revision>(path+'/manuscript'),api<Plan>(path+'/research-plan')]);if(r.id!==task.manuscript_revision_id||p.id!==task.plan_revision_id)throw new Error('Конфликт версий. Пересмотрите предложение; автоматического переноса нет.');body={request_id:crypto.randomUUID(),manuscript_revision_id:task.manuscript_revision_id,plan_revision_id:task.plan_revision_id,result_hash:await sha256(job.result),review_acknowledged:true};save({...pending.current,accept:body});}
+    await call('/'+job.id+'/accept',body);await loadJob(job.id);await onAccepted();setStatus('Текст принят новой версией. История и исходные UUID сохранены.');
+  }
+  async function cancel(){if(!job)return;const body=pending.current.cancel??{request_id:crypto.randomUUID(),evidence_ref:'Владелец отклонил предложение в интерфейсе',acknowledged:true};save({...pending.current,cancel:body});await call('/'+job.id+'/cancel',body);await loadJob(job.id);}
+  const selected=plan?.document.claims.filter(c=>claims.includes(c.id))??[];
+  return <section className="card model-assistant" aria-labelledby="assistant-title"><h2 id="assistant-title">AI Research Assistant</h2>
+    <p className="privacy">Локальная шаблонная композиция через MockGateway. Настоящая языковая модель не подключена. Структурная проверка не подтверждает научную истинность.</p>
+    <label>Ключ владельца помощника<input type="password" autoComplete="off" value={token} onChange={e=>{setToken(e.target.value);setConnected(false);invalidate();}} /></label><p>Ключ хранится только в памяти. Параметры запроса и UUID сохраняются в sessionStorage этой вкладки; фрагменты Evidence и ключ туда не записываются.</p>
+    <button disabled={busy||!token} onClick={()=>run(connect)}>Подключить помощника / восстановить задачи</button>
+    {busy&&<p role="status">Выполняется запрос…</p>}{error&&<p role="alert">{error}</p>}{status&&<p role="status">{status}</p>}
+    {unsaved&&<p role="alert">Есть несохранённые изменения рукописи или плана. Сохраните либо отмените их перед отправкой и принятием.</p>}
+    {connected&&<><p>Провайдер: mock · модель: mock-grounded-v1 · внешняя передача отключена.</p><p>Бюджет USD, микроединицы: лимит {budget?.limit_units??'не настроен'}, потрачено {budget?.spent_units??0}, резерв {budget?.reserved_units??0}{budget?.blocked?' · расходы заблокированы':''}.</p>
+    <details><summary>Настроить предельный бюджет проекта</summary><p>Лимит задаётся в микроединицах USD. Стоимость mock синтетическая; внешних платежей нет.</p><label>Новый лимит бюджета<input type="number" min={0} max={1000000000000} value={limit} onChange={e=>setLimit(Number(e.target.value))} /></label><button disabled={busy||!Number.isInteger(limit)||limit<0||limit>1e12} onClick={()=>run(async()=>{const b=await modelApi<typeof budget>(root+'/budget',token,{request_id:crypto.randomUUID(),evidence_ref:'Владелец явно установил лимит в интерфейсе',acknowledged:true,limit_units:limit},'PUT');setBudget(b);invalidate();})}>Подтвердить новый лимит бюджета</button></details>
+    <fieldset disabled={busy||!!pending.current.task}><legend>Сохранённый исследовательский контекст</legend>
+      <label>Версия рукописи<select value={revision?.id??''} onChange={e=>run(()=>loadSaved(e.target.value))}><option value="">Выберите версию</option>{revisions.map(r=><option key={r.id} value={r.id}>Версия {r.number}</option>)}</select></label>
+      <label>Версия научного плана<select value={plan?.id??''} onChange={e=>revision&&run(()=>loadSaved(revision.id,e.target.value))}><option value="">Выберите план</option>{plans.filter(p=>p.manuscript_revision_id===revision?.id).map(p=><option key={p.id} value={p.id}>План {p.number}</option>)}</select></label>
+      <label>Раздел<select value={section} onChange={e=>{setSection(e.target.value);const block=revision?.document.blocks.find(b=>b.id===e.target.value);setTitle(block&&'text'in block?block.text:'');setClaims([]);invalidate();}}><option value="">Все разделы</option>{revision?.document.blocks.filter(b=>b.type==='heading').map(b=><option key={b.id} value={b.id}>{'text'in b?b.text:''}</option>)}</select></label>
+      <label>Название нового раздела<input value={title} maxLength={500} onChange={e=>{setTitle(e.target.value);invalidate();}} /></label>
+      <label>Лимит выходных токенов<input type="number" min={256} max={8000} value={cap} onChange={e=>{setCap(Number(e.target.value));invalidate();}} /></label>
+      {plan?.document.claims.filter(c=>!section||c.section_id===section).map(c=><label key={c.id}><input type="checkbox" checked={claims.includes(c.id)} disabled={!claims.includes(c.id)&&claims.length>=20} onChange={e=>{setClaims(e.target.checked?[...claims,c.id]:claims.filter(id=>id!==c.id));invalidate();}} />{c.statement}</label>)}
+    </fieldset>
+    {revisions.length>0&&revisions.length%100===0&&<button disabled={busy} onClick={()=>run(()=>moreVersions('manuscript'))}>Ещё версии рукописи для помощника</button>}
+    {plans.length>0&&plans.length%100===0&&<button disabled={busy} onClick={()=>run(()=>moreVersions('research-plan'))}>Ещё версии плана для помощника</button>}
+    {selected.map(c=><article key={c.id}><h3>{c.statement}</h3>{c.evidence.map(link=>{const e=evidence.find(e=>e.id===link.evidence_id);return <details key={link.evidence_id}><summary>{relations[link.relation]} · {e?.source_version?.metadata.title??link.evidence_id}</summary><p>SourceVersion: {e?.source_version_id} · язык {e?.content.original_language??'und'} · локатор не проверен: {e?.content.locator.label}</p><p>Фрагмент: {e?.verification??'не проверен'}; полный текст {e?.full_text_verified?'проверен':'не проверен'}</p><blockquote>{e?.content.selection.quote}</blockquote><details><summary>Оригинал и метаданные точной версии</summary><pre>{e?.content.excerpt}</pre><pre>{JSON.stringify(e?.source_version,null,2)}</pre></details><p>{link.rationale}</p></details>;})}</article>)}
+    {(pending.current.task??job?.task)&&<p>Сохранён request UUID: {(pending.current.task??job?.task)?.request_id}. Повтор использует те же параметры.</p>}
+    <button disabled={busy||unsaved||(!pending.current.task&&(!claims.length||!title.trim()||!Number.isInteger(cap)||cap<256||cap>8000))||!!pending.current.jobId} onClick={()=>run(check)}>Предпросмотр контекста и стоимости</button>
+    <button disabled={busy} onClick={()=>{if(window.confirm('Начать отдельное задание с новым UUID? Предыдущее могло сохраниться и удерживать бюджет. Проверьте его статус.')){save({});setJob(null);invalidate();setStatus('Выберите параметры нового запроса.');}}}>Новое отдельное задание</button>
+    {preview&&<section><h3>Точный контекст запроса</h3><p>{preview.input.disclosure}</p><p>Входной предел: {preview.input.quote.input_token_bound}; выход: {preview.input.quote.output_token_cap}; максимальный резерв: {preview.input.quote.max_units} микроединиц USD (синтетическая стоимость mock).</p><details><summary>Все передаваемые материалы и версии</summary><pre>{JSON.stringify(preview.input.context,null,2)}</pre></details><label><input type="checkbox" checked={consent} onChange={e=>setConsent(e.target.checked)} />Разрешаю этот конкретный запрос с показанным контекстом и пределом бюджета</label><button disabled={busy||unsaved||!consent||!!pending.current.jobId||!budget||budget.blocked} onClick={()=>run(send)}>Создать задание</button></section>}
+    <section><h3>История задач</h3><button disabled={busy} onClick={()=>run(async()=>setHistory(await call<Job[]>('')))}>Обновить историю задач</button>{history.map(j=><button key={j.id} disabled={busy} onClick={()=>run(async()=>{save({jobId:j.id});invalidate();await loadJob(j.id);})}>{j.id} · {states[j.state]??j.state}</button>)}</section>
+    {job&&<section aria-label="Текущее задание"><h3>{states[job.state]??job.state}</h3><p>Job: {job.id} · удерживается {job.held_units??'уточняется'} · списано {job.charged_units??'неизвестно'}</p>{job.cancel_requested&&<p>Отмена запрошена; возврат средств не гарантирован.</p>}<button disabled={busy} onClick={()=>run(()=>loadJob(job.id).then(()=>{}))}>Перечитать результат</button>
+      {!job.acceptance&&<button disabled={busy||['cancelled','failed','invalid'].includes(job.state)} onClick={()=>run(cancel)}>Отменить задание / отклонить предложение</button>}
+      {job.state==='ambiguous'&&<p role="alert">Вызов мог состояться. Резерв удерживается; нового запроса автоматически не будет. Требуется сверка владельцем.</p>}
+      {job.result&&<details><summary>Структурированный результат и смысловая проверка</summary><pre>{JSON.stringify({result:job.result,report:job.report},null,2)}</pre></details>}
+      {job.result?.paragraphs&&<><h3>Предложение: смысловая проверка — {job.report?.semantic??'не выполнена'}</h3><div className="diff-columns"><div><h4>Исходная рукопись (без замены)</h4>{revision && revision.id===(job.task??pending.current.task)?.manuscript_revision_id?revision.document.blocks.map(b=><pre key={b.id}>{describeBlock(b)}</pre>):<p>Версия: {(job.task??pending.current.task)?.manuscript_revision_id}</p>}</div><div><h4>Добавляется в конец</h4>{job.result.paragraphs.map((p,i)=><p key={i}>{p}</p>)}</div></div><h4>Научные пробелы</h4>{job.result.research_gaps?.map((g,i)=><p key={i}>{g.explanation}</p>)}{job.result.warnings?.map((w,i)=><p key={i}>{w}</p>)}<details><summary>Связи цитат и полный отчёт проверки</summary><pre>{JSON.stringify({citations:job.result.citations,report:job.report},null,2)}</pre></details>
+        {job.acceptance?<div><p role="status">Уже принято: версия {job.acceptance.manuscript_revision_id}</p><button disabled={busy||unsaved} onClick={()=>run(onAccepted)}>Загрузить актуальную рукопись в редактор</button></div>:<><label><input type="checkbox" checked={review} onChange={e=>setReview(e.target.checked)} />Я проверил текст, Evidence, противоречия и ограничения</label><button disabled={busy||unsaved||!review||job.state!=='succeeded'} onClick={()=>run(accept)}>Принять текст новой версией</button></>}
+      </>}
+    </section>}</>}
+  </section>;
+}
