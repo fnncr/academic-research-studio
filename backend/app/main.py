@@ -1,11 +1,16 @@
 import asyncio
 import json
+import os
 import sys
 from contextlib import asynccontextmanager
 from pathlib import Path
 
 from fastapi import FastAPI, HTTPException, Query, Request
 from starlette.requests import ClientDisconnect
+from sqlalchemy.exc import SQLAlchemyError
+
+from app.database import project_engine
+from app.projects import router as projects_router
 
 MAX_UPLOAD = 10 * 1024 * 1024
 TIMEOUT = 15
@@ -14,10 +19,23 @@ TIMEOUT = 15
 @asynccontextmanager
 async def lifespan(app):
     app.state.slots = asyncio.Semaphore(2)
-    yield
+    app.state.project_engine = None
+    url = os.environ.get('DATABASE_URL')
+    if url:
+        try:
+            app.state.project_engine = project_engine(url)
+        except (ValueError, SQLAlchemyError):
+            # Invalid optional storage configuration must not disable extraction.
+            pass
+    try:
+        yield
+    finally:
+        if app.state.project_engine is not None:
+            app.state.project_engine.dispose()
 
 
 app = FastAPI(title='Academic Research Studio', lifespan=lifespan)
+app.include_router(projects_router)
 
 
 @app.middleware('http')
