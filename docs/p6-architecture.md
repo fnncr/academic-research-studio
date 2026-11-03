@@ -242,3 +242,6 @@ not invented zeros. Pre-dispatch cancellation records known zero usage; an owner
 full-reserve closure is labelled as such, not presented as a provider invoice.
 The first service is internal and mock-only; implementation boundaries and
 follow-up acceptance criteria are in [the Sol handoff](p6-implementation-handoff.md).
+Acceptance also checks serialized P2/P4 request-size limits, not only schema node
+limits. A generated addition that would make manual save/restore impossible is
+rejected atomically; no oversized manuscript/plan is committed.

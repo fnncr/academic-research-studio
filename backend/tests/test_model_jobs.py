@@ -402,3 +402,12 @@ def test_changed_system_policy_requires_new_preview_before_dispatch(setup,monkey
     with pytest.raises(ModelProblem,match='policy_changed'): q.dispatch(p,job['id'],claim['lease_token'])
     assert q.read(p,job['id'])['dispatch_id'] is None
     q.cancel(p,job['id']); assert budget(q,p)[1:]==(0,0)
+
+
+@pytest.mark.parametrize('limit,code',[('MAX_BODY','manuscript_too_large'),('PLAN_MAX_BODY','plan_too_large')])
+def test_acceptance_preserves_manual_save_payload_limits(setup,monkeypatch,limit,code):
+    q,p,s,client,path,manuscript,saved=setup; enqueue(q,p,s); result=run_once(q)
+    monkeypatch.setattr('app.model_jobs.'+limit,1)
+    with pytest.raises(ModelProblem,match=code): q.accept(p,result['id'],acceptance(s,result['result']))
+    assert client.get(path+'/manuscript').json()==manuscript
+    assert client.get(path+'/research-plan').json()==saved

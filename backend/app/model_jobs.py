@@ -3,6 +3,7 @@
 Not mounted as HTTP endpoints. Only MockGateway is enabled; adapters/API/UX are
 separate handoff work. Never call a provider while holding a database lock.
 """
+import json
 from copy import deepcopy
 from dataclasses import asdict
 from datetime import timedelta
@@ -12,10 +13,10 @@ from pydantic import ValidationError
 from sqlalchemy import select, func
 from sqlalchemy.orm import Session
 
-from app.evidence import latest_plan, validate_plan
+from app.evidence import MAX_BODY as PLAN_MAX_BODY, latest_plan, validate_plan
 from app.evidence_schema import SavePlan
 from app.manuscript_schema import ManuscriptDocument
-from app.manuscripts import current_revision, digest
+from app.manuscripts import MAX_BODY, current_revision, digest
 from app.model_context import SYSTEM_RULES, assemble_context, require, validate_proposal
 from app.model_contracts import AcceptanceSpec, Consent, TaskSpec
 from app.model_gateway import MockGateway
@@ -242,6 +243,9 @@ class ModelJobs:
             # Validate without reserializing old nodes/defaults. AI origin is recorded
             # in the immutable acceptance receipt, not a new P2 enum value.
             ManuscriptDocument.model_validate(document)
+            restore_envelope = {'document': document, 'request_id': str(uuid4()),
+                'base_revision_id': str(current.id), 'restored_from_id': str(current.id)}
+            require(len(json.dumps(restore_envelope, ensure_ascii=False).encode('utf-8')) <= MAX_BODY, 'manuscript_too_large')
             revision = ManuscriptRevision(project_id=project_id, number=current.number + 1, parent_id=current.id,
                 request_id=uuid5(job.id, 'manuscript-save'), request_hash=fingerprint,
                 content_hash=digest(document), document=document)
@@ -254,6 +258,7 @@ class ModelJobs:
                     'selection': {'start': citation.start, 'end': citation.end, 'quote': citation.quote}, 'kind': citation.kind})
             plan_request = SavePlan(request_id=uuid5(job.id, 'plan-save'), base_revision_id=plan.id,
                                    manuscript_revision_id=revision.id, document=plan_doc)
+            require(len(plan_request.model_dump_json().encode('utf-8')) <= PLAN_MAX_BODY, 'plan_too_large')
             evidence_ids = validate_plan(db, project_id, plan_request)
             new_plan = ResearchPlanRevision(project_id=project_id, number=plan.number + 1, parent_id=plan.id,
                 manuscript_revision_id=revision.id, request_id=plan_request.request_id, request_hash=fingerprint,
