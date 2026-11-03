@@ -94,3 +94,28 @@ FastAPI обслуживает API; React/TypeScript с Vite — интерфе�
 ## Экспорт Word (P5)
 
 В рукописи нажмите «Открыть экспорт Word». Выберите сохранённые версии рукописи и научного плана, стиль, профиль и титульные данные; выполните предварительную проверку и скачайте DOCX. Поддержаны структура P2, таблицы, колонтитулы/страницы, поле оглавления и ссылки на точные SourceVersion. [Руководство, воспроизводимость и ограничения](docs/exports.md). Начальный профиль — пользовательский пример, не официальный стандарт университета или проверенное оформление ГОСТ. Новых миграций и зависимостей нет.
+
+### P6: critical foundation (mock only)
+
+[P6 architecture](docs/p6-architecture.md) and
+[Sol implementation handoff](docs/p6-implementation-handoff.md) specify bounded
+model jobs, budgets, exact-context consent and safe section acceptance. The
+internal `app.model_jobs.ModelJobs` service and `app.model_worker.run_once` use
+PostgreSQL and a local mock; no AI API routes or real provider are enabled.
+Apply additive migration `0005_model_jobs` via the existing Alembic setup.
+`TEST_DATABASE_URL=… python -m pytest -q tests/test_model_jobs.py` runs the
+foundation invariants from `backend/`. No model API key is required. Existing
+manual editing, evidence and DOCX export remain independent of model execution.
+
+P6 Task A adds the [owner-only API and supervised mock worker](docs/p6-task-a.md),
+immutable decision audit (migration 0006), budget reconciliation/unfreeze and an
+optional Compose `models` profile. Set `MODEL_OWNER_TOKEN` for the API; all model
+providers remain mock-only until a real provider is approved. Manual workflows
+remain available when model API is disabled. See the runbook for the personal
+single-owner deployment boundary and explicit limits of these checks.
+
+[P6 Task B](docs/p6-task-b.md) adds deterministic Evidence-grounded section
+composition, complete contradiction/limit accounting, bibliography diagnostics,
+versioned prompts and separate semantic-review jobs. The local reviewer reports
+uncertainty; owner-authenticated human reviews need no model execution or budget.
+Real LLM generation/review remains disabled pending provider approval.

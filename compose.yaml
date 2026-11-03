@@ -14,5 +14,20 @@ services:
       interval: 3s
       timeout: 3s
       retries: 20
+  model-worker:
+    profiles: [models]
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.model-worker
+    environment:
+      DATABASE_URL: postgresql+psycopg://studio:${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD}@db:5432/studio
+      MODEL_PROVIDER: mock
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+    stop_grace_period: 30s
+    read_only: true
+    tmpfs: [/tmp]
 volumes:
   studio_postgres:
