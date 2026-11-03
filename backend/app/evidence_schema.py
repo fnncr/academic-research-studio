@@ -35,6 +35,7 @@ class WriteEvidence(Strict):
     request_id: UUID
     source_version_id: UUID
     excerpt: Text
+    original_language: Annotated[str, StringConstraints(strict=True, pattern=r'^(?:[a-z]{2,3})(?:-[A-Z]{2})?$')] = 'und'
     selection: TextRange
     locator: Locator
     material: Literal['abstract', 'full_text_excerpt']

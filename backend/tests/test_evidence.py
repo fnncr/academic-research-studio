@@ -192,3 +192,65 @@ def test_payload_limits_and_optional_storage(workspace, monkeypatch):
     with TestClient(app) as offline:
         assert offline.get(path + '/evidence').status_code == 503
         assert offline.get('/api/health').status_code == 200
+
+
+def test_original_language_is_separate_from_source_metadata(workspace):
+    client, path, source, _ = workspace
+    body = {**excerpt(source['latest_version']['id']), 'original_language': 'en'}
+    response = client.post(path + '/evidence', json=body)
+    assert response.status_code == 201, response.text
+    assert response.json()['content']['original_language'] == 'en'
+    assert response.json()['content']['excerpt'] == body['excerpt']
+    assert client.post(path + '/evidence', json=body).json() == response.json()
+    body['original_language'] = 'ru'
+    assert client.post(path + '/evidence', json=body).status_code == 409
+    body['request_id'] = str(uuid4()); body['original_language'] = 'invalid language'
+    assert client.post(path + '/evidence', json=body).status_code == 422
+
+
+def test_user_roundtrip_source_evidence_claim_citation_reload_restore(workspace):
+    client, path, source, manuscript = workspace
+    original = excerpt(source['latest_version']['id'])
+    original['original_language'] = 'en'
+    saved_evidence = client.post(path + '/evidence', json=original).json()
+    body = plan(manuscript, saved_evidence['id'])
+    route = path + '/research-plan'
+    first = client.post(route + '/revisions', json=body)
+    assert first.status_code == 201, first.text
+    first = first.json()
+    changed = deepcopy(body)
+    changed.update(request_id=str(uuid4()), base_revision_id=first['id'])
+    changed['document']['claims'][0]['statement'] = 'Уточнённая формулировка'
+    second = client.post(route + '/revisions', json=changed).json()
+    with TestClient(app) as restarted:
+        assert restarted.get(route).json() == second
+        assert restarted.get(path + '/evidence/' + saved_evidence['id']).json()['content']['original_language'] == 'en'
+        archived = restarted.get(route + '/revisions/' + first['id']).json()
+        restored = restarted.post(route + '/revisions', json={
+            'request_id': str(uuid4()), 'base_revision_id': second['id'],
+            'manuscript_revision_id': archived['manuscript_revision_id'], 'document': archived['document']})
+        assert restored.status_code == 201, restored.text
+        assert restored.json()['number'] == 3
+        assert restored.json()['document'] == first['document']
+        assert restarted.get(route + '/revisions/' + first['id']).json() == first
+
+
+def test_p4a_request_can_be_retried_after_language_extension(workspace, storage):
+    from sqlalchemy.orm import Session
+    from app.models import Evidence
+    from app.manuscripts import digest
+    client, path, source, _ = workspace
+    body = excerpt(source['latest_version']['id'])
+    # Seed exactly the request and content shape written by the P4a release.
+    legacy_content = {key: value for key, value in body.items() if key not in {'request_id', 'source_version_id'}}
+    engine = project_engine(storage[1])
+    try:
+        with Session(engine) as db:
+            record = Evidence(project_id=path.rsplit('/', 1)[1], source_version_id=body['source_version_id'],
+                request_id=body['request_id'], request_hash=digest(body), content_hash=digest(legacy_content), content=legacy_content)
+            db.add(record); db.commit(); identifier = str(record.id)
+        retried = client.post(path + '/evidence', json=body)
+        assert retried.status_code == 201, retried.text
+        assert retried.json()['id'] == identifier
+        assert 'original_language' not in retried.json()['content']
+    finally: engine.dispose()
