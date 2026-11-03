@@ -1,4 +1,5 @@
-import { useEffect, useState, type FormEvent } from 'react';
+import { useCallback, useEffect, useRef, useState, type FormEvent } from 'react';
+import Manuscript from './Manuscript';
 type Summary = { id: string; title: string; research_question: string; created_at: string };
 type Brief = { id: string; number: number; requirements: string; created_at: string };
 type Project = Summary & { latest_brief: Brief };
@@ -10,6 +11,10 @@ async function api<T>(path: string, options?: RequestInit): Promise<T> {
 }
 const post = (body: unknown) => ({ method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
 export default function Projects() {
+  const [editorOpen, setEditorOpen] = useState(false);
+  const manuscriptDirty = useRef(false);
+  const reportDirty = useCallback((value: boolean) => { manuscriptDirty.current = value; }, []);
+  function canLeave() { return !manuscriptDirty.current || window.confirm('В рукописи есть несохранённые изменения или незавершённый запрос. Перейти в другой проект и закрыть этот черновик?'); }
   const [projects, setProjects] = useState<Summary[]>([]);
   const [selected, setSelected] = useState<Project | null>(null);
   const [history, setHistory] = useState<Brief[]>([]);
@@ -40,15 +45,19 @@ export default function Projects() {
     setProjects(append ? [...projects, ...items] : items); setMoreProjects(items.length === 20);
   }
   async function open(id: string, preserveDraft = false) {
+    if (id !== selected?.id && !canLeave()) return;
     const [project, briefs] = await Promise.all([api<Project>(`/api/projects/${id}`), api<Brief[]>(`/api/projects/${id}/brief-revisions`)]);
     setSelected(project); setHistory(briefs); setMoreHistory(briefs.length === 20);
+    if (id !== selected?.id) { setEditorOpen(false); manuscriptDirty.current = false; }
     if (!preserveDraft) setDraft(project.latest_brief.requirements);
   }
   async function create(event: FormEvent) {
     event.preventDefault();
+    if (!canLeave()) return;
     await run(async () => {
       const project = await api<Project>('/api/projects', post({ title, research_question: question, requirements: initial }));
       setSelected(project); setHistory([project.latest_brief]); setMoreHistory(false); setDraft(project.latest_brief.requirements);
+      setEditorOpen(false); manuscriptDirty.current = false;
       setTitle(''); setQuestion(''); setInitial(''); setStatus('Проект сохранён.');
       await list();
     });
@@ -78,5 +87,6 @@ export default function Projects() {
       <h3>История требований</h3><ol>{history.map(b => <li key={b.id}><details><summary>Версия {b.number} · {new Date(b.created_at).toLocaleString('ru-RU')}</summary><p className="text">{b.requirements}</p></details></li>)}</ol>
       {moreHistory && <button disabled={busy} onClick={() => run(async () => { const items = await api<Brief[]>(`/api/projects/${selected.id}/brief-revisions?offset=${history.length}`); setHistory([...history, ...items]); setMoreHistory(items.length === 20); })}>Предыдущие версии</button>}
     </section>}
+    {selected && <><button disabled={busy} onClick={() => setEditorOpen(true)}>Открыть рукопись</button>{editorOpen && <Manuscript key={selected.id} projectId={selected.id} onDirty={reportDirty} />}</>}
   </main>;
 }
