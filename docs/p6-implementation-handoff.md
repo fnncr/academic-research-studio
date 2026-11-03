@@ -200,3 +200,14 @@ acceptance cannot be inferred solely from OOXML tests.
 semantic evaluation quality and human acceptance. P6 is incomplete until its UI,
 real approved gateway, explicit consent UX, independent review and operational
 recovery have been accepted. Corpus Engine and SQ01–SQ10 remain separate phases.
+
+## Provenance display compatibility note
+
+P2's existing paragraph `origin` distinguishes manual/document import formats;
+this foundation preserves that enum and records AI proposal provenance in the
+immutable ModelAcceptance -> job -> paragraph UUID derivation instead. Task C
+must show that provenance on accepted sections, rather than interpreting
+`origin=manual` as proof that a human originally wrote every word. If the owner
+prefers an explicit new origin enum, introduce it as a coordinated, additive
+backend/frontend compatibility change with old-version tests. Do not mutate old
+snapshots to relabel their authorship.
