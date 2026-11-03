@@ -1,0 +1,25 @@
+[
+  {
+    "id": "academic-example-v1",
+    "description": "Пользовательский пример оформления. Не официальный стандарт университета.",
+    "profile": {
+      "name": "Академический пример A4",
+      "paper": "A4",
+      "font": "Times New Roman",
+      "font_size": 14,
+      "line_spacing": 1.5,
+      "alignment": "justify",
+      "first_line_cm": 1.25,
+      "margin_top_cm": 2,
+      "margin_bottom_cm": 2,
+      "margin_left_cm": 3,
+      "margin_right_cm": 1.5,
+      "paragraph_after_pt": 0,
+      "header": "",
+      "footer": "",
+      "page_numbers": true,
+      "toc": true,
+      "number_tables": true
+    }
+  }
+]
