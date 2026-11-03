@@ -60,7 +60,11 @@ def evidence_view(record):
 @router.post('/evidence', status_code=201)
 def create_evidence(project_id: UUID, body: EvidenceInput, db: DB):
     get_project(db, project_id, lock=True)
-    fingerprint = digest(body.model_dump(mode='json'))
+    # Preserve hashes issued by P4a clients that had no language field.
+    request_data = body.model_dump(mode='json')
+    if body.original_language == 'und':
+        request_data.pop('original_language')
+    fingerprint = digest(request_data)
     previous = db.scalar(select(Evidence).where(Evidence.project_id == project_id, Evidence.request_id == body.request_id))
     if previous is not None:
         if previous.request_hash != fingerprint:

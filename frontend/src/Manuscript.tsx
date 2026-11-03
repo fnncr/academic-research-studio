@@ -1,4 +1,5 @@
-import { useEffect, useRef, useState, type ChangeEvent } from 'react';
+import { useCallback, useEffect, useRef, useState, type ChangeEvent } from 'react';
+import EvidenceWorkspace from './EvidenceWorkspace';
 import ManuscriptBlock from './ManuscriptBlock';
 import { describeBlock, diffDocuments, documentProblem, emptyDocument, importedBlocks, importWarning, labels, newBlock, sameDocument, type Block, type ManuscriptDocument, type Revision, type RevisionSummary } from './manuscript';
 
@@ -16,6 +17,9 @@ export function ManuscriptDiff({ before, after }: { before: ManuscriptDocument; 
 }
 
 export default function Manuscript({ projectId, onDirty }: { projectId: string; onDirty: (dirty: boolean) => void }) {
+  const [evidenceOpen, setEvidenceOpen] = useState(false);
+  const [evidenceDirty, setEvidenceDirty] = useState(false);
+  const reportEvidenceDirty = useCallback((value: boolean) => setEvidenceDirty(value), []);
   const path = `/api/projects/${projectId}/manuscript`;
   const [base, setBase] = useState<Revision | null>(null);
   const [draft, setDraft] = useState<ManuscriptDocument>(emptyDocument);
@@ -35,7 +39,7 @@ export default function Manuscript({ projectId, onDirty }: { projectId: string; 
   const pending = useRef<{ fingerprint: string; requestId: string } | null>(null);
   const dirty = loaded && (!sameDocument(draft, base?.document ?? emptyDocument()) || restoredFrom !== null);
   const issue = documentProblem(draft);
-  useEffect(() => { onDirty(dirty || busy && loaded); }, [dirty, busy, loaded, onDirty]);
+  useEffect(() => { onDirty(dirty || evidenceDirty || busy && loaded); }, [dirty, evidenceDirty, busy, loaded, onDirty]);
   useEffect(() => {
     const guard = (event: BeforeUnloadEvent) => { if (dirty || busy && loaded) { event.preventDefault(); event.returnValue = ''; } };
     window.addEventListener('beforeunload', guard);
@@ -119,6 +123,7 @@ export default function Manuscript({ projectId, onDirty }: { projectId: string; 
       {more && <button disabled={busy} onClick={() => run(() => readHistory(true))}>Ещё версии рукописи</button>}
       {compared && <section><h3>Версия {compared.number} → текущий черновик</h3><ManuscriptDiff before={compared.document} after={draft} /><button disabled={busy} onClick={() => { edit(compared.document); setRestoredFrom(compared.id); setStatus(`Версия ${compared.number} загружена в черновик. Сохраните её новой версией, чтобы завершить восстановление.`); }}>Восстановить версию {compared.number} в черновик</button></section>}
     </section></>}
+    {base && <><button disabled={busy} onClick={() => setEvidenceOpen(true)}>Открыть научные доказательства</button>{evidenceOpen && <EvidenceWorkspace projectId={projectId} manuscript={base} manuscriptDirty={dirty} onDirty={reportEvidenceDirty} />}</>}
     <p className="privacy">Несохранённый текст хранится только в этой вкладке. Перед закрытием сохраните версию. Автоматических резервных копий пока нет.</p>
   </section>;
 }

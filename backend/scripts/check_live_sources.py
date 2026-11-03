@@ -1,7 +1,8 @@
 """Opt-in live metadata check; no database, documents, API keys or raw URLs in output.
 
 Run from backend: PYTHONPATH=. ../.venv/bin/python scripts/check_live_sources.py
-Writes JSON to stdout; exits 1 if any check fails or cannot be completed.
+Writes JSON to stdout; exits 1 if a required check fails or cannot be completed.
+Text-search rank is diagnostic and does not prove publication absence.
 Makes at most 16 sequential requests, with no retries or full-text downloads.
 """
 import asyncio
@@ -60,8 +61,16 @@ def assess(result, expected):
     }
 
 
+def required_check_passed(result, checks, mode):
+    if result['status'] != 'completed':
+        return False
+    # Ranked discovery is not an exact lookup contract. Keep metadata comparisons
+    # and rank in the report, but never require one known work in the first page.
+    return all(checks.values()) if mode == 'doi' else result['code'] in ('ok', 'no_results')
+
+
 async def main():
-    report = {'checked_at': datetime.now(timezone.utc).isoformat(),
+    report = {'report_format_version': 2, 'complete_scope': 'required_metadata_and_error_contracts', 'checked_at': datetime.now(timezone.utc).isoformat(),
         'checks': [], 'provider_differences': [], 'errors': [], 'complete': True}
     snapshots = {}
     for provider in ENDPOINTS:
@@ -71,7 +80,11 @@ async def main():
                 result = await query(provider, work['doi'] if mode == 'doi' else work['title'], mode)
                 checks = assess(result, work)
                 report['checks'].append({'expected': work, 'mode': mode, 'result': result, 'checks': checks})
-                if not all(checks.values()):
+                rank = next((hit['rank'] for hit in result['hits'] if hit['metadata']['doi'] == work['doi']), None)
+                report['checks'][-1]['assessment_kind'] = 'exact_doi' if mode == 'doi' else 'ranked_search'
+                report['checks'][-1]['expected_doi_rank'] = rank
+                report['checks'][-1]['passed'] = required_check_passed(result, checks, mode)
+                if not report['checks'][-1]['passed']:
                     report['complete'] = False
                 if result['status'] != 'completed':
                     reachable = False
