@@ -5,8 +5,9 @@ export type ListBlock = { id: string; type: 'list'; ordered: boolean; items: Par
 export type Cell = { id: string; text: string };
 export type Table = { id: string; type: 'table'; rows: { id: string; cells: Cell[] }[] };
 export type Citation = { id: string; type: 'citation_placeholder'; label: string; locator: string };
+export type Footnote = { id: string; type: 'footnote'; text: string; anchor: { block_id: string; start: number; end: number; quote: string } | null };
 export type Formula = { id: string; type: 'formula'; text: string };
-export type Block = Paragraph | Heading | Quote | ListBlock | Table | Citation | Formula;
+export type Block = Paragraph | Heading | Quote | ListBlock | Table | Citation | Formula | Footnote;
 export type ManuscriptDocument = { schema_version: '1' | '2'; blocks: Block[] };
 export type RevisionSummary = { id: string; project_id: string; number: number; parent_id: string | null; restored_from_id: string | null; content_hash: string; created_at: string };
 export type Revision = RevisionSummary & { document: ManuscriptDocument };
@@ -16,6 +17,7 @@ export const cell = (): Cell => ({ id: crypto.randomUUID(), text: '' });
 export function newBlock(type: Block['type']): Block {
   const id = crypto.randomUUID();
   switch (type) {
+    case 'footnote': return { id, type, text: '', anchor: null };
     case 'formula': return { id, type, text: '' };
     case 'paragraph': return paragraph();
     case 'heading': return { id, type, text: '', level: 1 };
@@ -25,7 +27,7 @@ export function newBlock(type: Block['type']): Block {
     case 'citation_placeholder': return { id, type, label: '', locator: '' };
   }
 }
-export const labels: Record<Block['type'], string> = { formula: 'Формула', heading: 'Заголовок', paragraph: 'Абзац', quote: 'Цитата', list: 'Список', table: 'Таблица', citation_placeholder: 'Заготовка ссылки' };
+export const labels: Record<Block['type'], string> = { footnote: 'Сноска', formula: 'Формула', heading: 'Заголовок', paragraph: 'Абзац', quote: 'Цитата', list: 'Список', table: 'Таблица', citation_placeholder: 'Заготовка ссылки' };
 export const importWarning = 'Импортирован только текст: заголовки, списки, таблицы, сноски, ссылки и форматирование автоматически не восстанавливаются. Проверьте порядок фрагментов; структуру создайте вручную. Оригинал файла не сохраняется.';
 export function importedBlocks(format: 'docx' | 'pdf', chunks: { text: string; page: number | null }[]): Paragraph[] {
   // Keep extraction chunks intact; do not guess headings, table cells or citations.
@@ -52,6 +54,7 @@ export function documentProblem(document: ManuscriptDocument): string | null {
 }
 export function describeBlock(block: Block): string {
   switch (block.type) {
+    case 'footnote': return `Сноска к «${block.anchor?.quote ?? 'не выбрано'}»\n${block.text}`;
     case 'formula': return `Формула (линейная запись Word)\n${block.text}`;
     case 'heading': return `Заголовок ${block.level}\n${block.text}`;
     case 'paragraph': return `Абзац · ${block.marks.join(', ') || 'обычный'} · ${block.origin}${block.page ? ` · стр. ${block.page}` : ''}\n${block.text}`;

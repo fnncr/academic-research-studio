@@ -10,7 +10,7 @@ export type PlanDocument = { schema_version: '1'; claims: Claim[]; citations: Ci
 export type Plan = { id: string; number: number; manuscript_revision_id: string; document: PlanDocument; created_at: string };
 export const emptyPlan = (): PlanDocument => ({ schema_version: '1', claims: [], citations: [] });
 export const relations = { supports: 'Подтверждает', contradicts: 'Противоречит', limits: 'Ограничивает применимость' };
-export function textNodes(revision: Revision) {
+export function textNodes(revision: Pick<Revision, 'document'>) {
   const nodes: { id: string; text: string; type?: string }[] = [];
   function visit(value: unknown) {
     if (Array.isArray(value)) value.forEach(visit);

@@ -60,6 +60,19 @@ class Table(Node):
         return self
 
 
+class FootnoteAnchor(StrictModel):
+    block_id: UUID
+    start: Annotated[int, Field(strict=True, ge=0, le=40000)]
+    end: Annotated[int, Field(strict=True, ge=1, le=40000)]
+    quote: Text
+
+
+class Footnote(Node):
+    type: Literal['footnote']
+    text: Text
+    anchor: FootnoteAnchor
+
+
 class Formula(Node):
     type: Literal['formula']
     text: Text
@@ -71,7 +84,7 @@ class CitationPlaceholder(Node):
     locator: Label = ''
 
 
-Block = Annotated[Paragraph | Heading | Quote | ListBlock | Table | CitationPlaceholder | Formula,
+Block = Annotated[Paragraph | Heading | Quote | ListBlock | Table | CitationPlaceholder | Formula | Footnote,
                   Field(discriminator='type')]
 
 
@@ -81,7 +94,7 @@ class ManuscriptDocument(StrictModel):
 
     @model_validator(mode='after')
     def safe_tree(self):
-        if self.schema_version == '1' and any(b.type == 'formula' for b in self.blocks):
+        if self.schema_version == '1' and any(b.type in ('formula', 'footnote') for b in self.blocks):
             raise ValueError('New objects require schema 2')
         ids = set()
         characters = 0
@@ -104,7 +117,23 @@ class ManuscriptDocument(StrictModel):
                 for item in value:
                     visit(item)
 
-        visit(self.model_dump())
+        snapshot = self.model_dump(mode='json')
+        visit(snapshot)
+        from app.evidence_schema import utf16_slice
+        targets = {}
+        def collect(value):
+            if isinstance(value, dict):
+                if 'id' in value and 'text' in value: targets[value['id']] = value
+                for child in value.values(): collect(child)
+            elif isinstance(value, list):
+                for child in value: collect(child)
+        collect(snapshot)
+        for block in self.blocks:
+            if block.type == 'footnote':
+                anchor = block.anchor
+                target = targets.get(str(anchor.block_id))
+                if not target or target.get('type') == 'footnote' or utf16_slice(target['text'], anchor.start, anchor.end) != anchor.quote:
+                    raise ValueError('Footnote anchor is stale or invalid')
         if len(ids) > 2000 or characters > 250000:
             raise ValueError('Document exceeds node or text limit')
         return self
