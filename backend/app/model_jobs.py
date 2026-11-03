@@ -1,7 +1,7 @@
 """Transactional P6 kernel. Every public method owns a short transaction.
 
-Not mounted as HTTP endpoints. Only MockGateway is enabled; adapters/API/UX are
-separate handoff work. Never call a provider while holding a database lock.
+The owner-only HTTP layer delegates to this service. Only MockGateway is
+enabled; external adapters require separate provider approval. Never call a provider while holding a database lock.
 """
 import json
 from copy import deepcopy
@@ -20,7 +20,7 @@ from app.manuscripts import MAX_BODY, current_revision, digest
 from app.model_context import SYSTEM_RULES, assemble_context, require, validate_proposal
 from app.model_contracts import AcceptanceSpec, Consent, TaskSpec
 from app.model_gateway import MockGateway
-from app.models import (ModelAcceptance, ModelBudget, ModelJob, ModelSettlement,
+from app.models import (ModelAudit, ModelAcceptance, ModelBudget, ModelJob, ModelSettlement,
                         ManuscriptRevision, ResearchPlanRevision, PlanEvidenceReference)
 from app.projects import get_project
 
@@ -54,7 +54,8 @@ class ModelJobs:
     def _preview(self, db, project_id, spec):
         packet = assemble_context(db, project_id, spec)
         quote = asdict(MockGateway().quote(packet, spec))
-        data = {'task': spec.model_dump(mode='json'), 'context': packet, 'quote': quote}
+        data = {'task': spec.model_dump(mode='json'), 'context': packet, 'quote': quote,
+                'disclosure': 'mock-local-v1: no external transmission or provider retention'}
         return {'fingerprint': digest(data), 'input': data}
 
     def preview(self, project_id: UUID, spec: TaskSpec):
@@ -73,7 +74,7 @@ class ModelJobs:
                 db.add(ModelBudget(project_id=project_id, currency='USD', limit_units=limit_units,
                                    spent_units=0, reserved_units=0))
 
-    def enqueue(self, project_id: UUID, spec: TaskSpec, consent: Consent):
+    def enqueue(self, project_id: UUID, spec: TaskSpec, consent: Consent, actor=None, with_creation=False):
         with Session(self.engine) as db, db.begin():
             get_project(db, project_id, lock=True)
             preview = self._preview(db, project_id, spec)
@@ -82,7 +83,9 @@ class ModelJobs:
                                                         ModelJob.request_id == spec.request_id))
             if previous:
                 require(previous.fingerprint == preview['fingerprint'], 'request_conflict')
-                return view(previous)
+                if actor: self._audit(db, project_id, previous.id, 'consent', spec.request_id, actor,
+                    {'fingerprint': preview['fingerprint'], 'disclosure': preview['input']['disclosure']})
+                return dict(view(previous), created=False) if with_creation else view(previous)
             budget = db.scalar(select(ModelBudget).where(ModelBudget.project_id == project_id).with_for_update())
             units = preview['input']['quote']['max_units']
             require(budget is not None and budget.currency == preview['input']['quote']['currency'] and
@@ -93,13 +96,20 @@ class ModelJobs:
                 manuscript_revision_id=spec.manuscript_revision_id, plan_revision_id=spec.plan_revision_id,
                 input_json=preview['input'], reserved_units=units, state='queued', cancel_requested=False)
             db.add(job); db.flush()
-            return view(job)
+            if actor: self._audit(db, project_id, job.id, 'consent', spec.request_id, actor,
+                {'fingerprint': preview['fingerprint'], 'disclosure': preview['input']['disclosure']})
+            return dict(view(job), created=True) if with_creation else view(job)
 
     def read(self, project_id: UUID, job_id: UUID):
         with Session(self.engine) as db:
             job = db.scalar(select(ModelJob).where(ModelJob.project_id == project_id, ModelJob.id == job_id))
             require(job is not None, 'not_found')
-            return view(job)
+            result = view(job)
+            settled = db.get(ModelSettlement, job.id)
+            result['charged_units'] = settled.charged_units if settled else None
+            result['held_units'] = 0 if settled else job.reserved_units
+            result['usage'] = {'input_tokens': settled.input_tokens, 'output_tokens': settled.output_tokens} if settled else None
+            return result
 
     def claim(self):
         with Session(self.engine) as db, db.begin():
@@ -186,9 +196,10 @@ class ModelJobs:
             self._settle(db, job, reply.charged_units, 'provider_response', reply.input_tokens, reply.output_tokens)
             return view(job)
 
-    def cancel(self, project_id, job_id):
+    def cancel(self, project_id, job_id, actor=None, decision=None):
         with Session(self.engine) as db, db.begin():
             job = self._lock(db, project_id, job_id)
+            if actor: self._audit(db, project_id, job.id, 'cancel', decision.request_id, actor, decision.model_dump(mode='json'))
             require(db.get(ModelAcceptance, job.id) is None, 'already_accepted')
             job.cancel_requested = True
             if job.state in {'queued', 'leased'}:
@@ -196,7 +207,7 @@ class ModelJobs:
             elif job.state == 'succeeded': job.state = 'cancelled'
             return view(job)
 
-    def reconcile(self, project_id, job_id, charged_units, reason):
+    def reconcile(self, project_id, job_id, charged_units, reason, actor=None, decision=None):
         """Administrative boundary: requires owner decision/evidence, never resend.
 
         Only two bounded resolution codes; HTTP actor/audit integration is deferred.
@@ -205,6 +216,7 @@ class ModelJobs:
         require(reason in {'provider_receipt', 'owner_full_reserve'}, 'invalid_resolution')
         with Session(self.engine) as db, db.begin():
             job = self._lock(db, project_id, job_id)
+            if actor: self._audit(db, project_id, job.id, 'reconcile', decision.request_id, actor, decision.model_dump(mode='json'))
             existing = db.get(ModelSettlement, job.id)
             if existing:
                 require(existing.charged_units == charged_units and existing.reason == reason, 'request_conflict')
@@ -216,9 +228,10 @@ class ModelJobs:
             job.report = {'code': 'resolved_without_result', 'resolution': reason}
             return view(job)
 
-    def accept(self, project_id, job_id, request: AcceptanceSpec):
+    def accept(self, project_id, job_id, request: AcceptanceSpec, actor=None):
         with Session(self.engine) as db, db.begin():
             job = self._lock(db, project_id, job_id)
+            if actor: self._audit(db, project_id, job.id, 'accept', request.request_id, actor, request.model_dump(mode='json'))
             fingerprint = digest(request.model_dump(mode='json'))
             previous = db.get(ModelAcceptance, job_id)
             if previous:
@@ -270,3 +283,70 @@ class ModelJobs:
                 request_hash=fingerprint, manuscript_revision_id=revision.id, plan_revision_id=new_plan.id)
             db.add(receipt); db.flush()
             return receipt_view(receipt)
+
+
+    def _audit(self, db, project_id, job_id, action, request_id, actor, details):
+        fingerprint = digest({'actor': actor, 'job_id': str(job_id), 'details': details})
+        old = db.scalar(select(ModelAudit).where(ModelAudit.project_id == project_id,
+            ModelAudit.action == action, ModelAudit.request_id == request_id))
+        if old:
+            require(old.request_hash == fingerprint, 'request_conflict')
+            return True
+        db.add(ModelAudit(project_id=project_id, job_id=job_id, action=action,
+            request_id=request_id, actor=actor, request_hash=fingerprint, details=details))
+        return False
+
+    def budget(self, project_id):
+        with Session(self.engine) as db:
+            get_project(db, project_id)
+            b = db.get(ModelBudget, project_id)
+            return {'currency': b.currency, 'limit_units': b.limit_units, 'reserved_units': b.reserved_units,
+                    'spent_units': b.spent_units, 'blocked': b.blocked} if b else None
+
+    def administer_budget(self, project_id, decision, actor, unblock=False):
+        with Session(self.engine) as db, db.begin():
+            get_project(db, project_id, lock=True)
+            action = 'unblock' if unblock else 'budget'
+            if self._audit(db, project_id, None, action, decision.request_id, actor, decision.model_dump(mode='json')):
+                return
+            b = db.get(ModelBudget, project_id)
+            if unblock:
+                require(b is not None, 'not_found')
+                unresolved = db.scalar(select(ModelJob.id).where(ModelJob.project_id == project_id,
+                    ModelJob.state.in_(['dispatching', 'ambiguous'])).limit(1))
+                require(unresolved is None, 'ambiguous_outcome')
+                b.blocked = False
+            elif b:
+                require(decision.limit_units >= b.spent_units + b.reserved_units, 'budget_exhausted')
+                b.limit_units = decision.limit_units
+            else:
+                db.add(ModelBudget(project_id=project_id, currency='USD', limit_units=decision.limit_units,
+                                   reserved_units=0, spent_units=0, blocked=False))
+
+    def list_jobs(self, project_id, limit=20):
+        with Session(self.engine) as db:
+            get_project(db, project_id)
+            return [view(j) for j in db.scalars(select(ModelJob).where(ModelJob.project_id == project_id)
+                    .order_by(ModelJob.created_at.desc(), ModelJob.id).limit(limit))]
+
+    def predispatch_failure(self, project_id, job_id, token):
+        with Session(self.engine) as db, db.begin():
+            job = self._lock(db, project_id, job_id)
+            require(job.state == 'leased' and job.lease_token == token and job.dispatch_id is None, 'stale_lease')
+            self._settle(db, job, 0, 'configuration_failure', 0, 0)
+            job.state = 'failed'; job.report = {'code': 'gateway_unavailable_before_dispatch'}
+            return view(job)
+
+    def worker_input(self, project_id, job_id, token):
+        with Session(self.engine) as db:
+            job = db.scalar(select(ModelJob).where(ModelJob.project_id == project_id, ModelJob.id == job_id))
+            require(job is not None and job.state == 'leased' and job.lease_token == token, 'stale_lease')
+            return deepcopy(job.input_json)
+
+
+    def release_claim(self, project_id, job_id, token):
+        with Session(self.engine) as db, db.begin():
+            job = self._lock(db, project_id, job_id)
+            require(job.state == 'leased' and job.lease_token == token and job.dispatch_id is None, 'stale_lease')
+            job.state = 'queued'; job.lease_token = None; job.lease_until = None
+            return view(job)

@@ -68,3 +68,34 @@ class MockGateway:
                   'claims': assessments, 'citations': [], 'research_gaps': gaps,
                   'warnings': ['Mock не выполняет научную генерацию.'], 'verification': 'unverified'}
         return GatewayReply(result, 100, 50, 50)
+
+
+class GatewayUnavailable(ValueError):
+    """Safe startup/configuration error, contains no credential/provider body."""
+
+
+def configured_gateway():
+    import os
+    if os.environ.get('MODEL_PROVIDER','mock') != 'mock':
+        raise GatewayUnavailable('provider_not_approved')
+    return MockGateway()
+
+
+def check_ready(gateway):
+    if not isinstance(gateway, MockGateway):
+        raise GatewayUnavailable('provider_not_approved')
+
+
+def _reject_constant(value):
+    raise ValueError('Non-finite JSON number')
+
+
+def decode_reply(data, charged_units, input_tokens, output_tokens):
+    """Bounded transport decoder for fixture adapters; never prints response data."""
+    if len(data)>1024*1024: raise AmbiguousOutcome()
+    try:
+        result=json.loads(data, parse_constant=_reject_constant)
+        if not isinstance(result,dict): raise ValueError()
+        if any(type(v) is not int or v<0 for v in (charged_units,input_tokens,output_tokens)): raise ValueError()
+        return GatewayReply(result,charged_units,input_tokens,output_tokens)
+    except (ValueError,UnicodeError): raise AmbiguousOutcome() from None
