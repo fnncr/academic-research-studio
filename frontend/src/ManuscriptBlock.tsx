@@ -1,4 +1,5 @@
-import { cell, paragraph, type Block, type Paragraph } from './manuscript';
+import FootnoteFields from './FootnoteFields';
+import { cell, paragraph, type Block, type Paragraph, type ManuscriptDocument } from './manuscript';
 
 function ParagraphFields({ block, change, label }: { block: Paragraph; change: (value: Paragraph) => void; label: string }) {
   return <><label>{label}<textarea maxLength={20000} value={block.text} onChange={e => change({ ...block, text: e.target.value })} /></label>
@@ -6,8 +7,9 @@ function ParagraphFields({ block, change, label }: { block: Paragraph; change: (
     {block.origin !== 'manual' && <p className="privacy">Импортированный текст{block.page ? ` · страница ${block.page}` : ''}. Исходное форматирование неизвестно.</p>}</>;
 }
 
-export default function ManuscriptBlock({ block, change, index }: { block: Block; change: (value: Block) => void; index: number }) {
+export default function ManuscriptBlock({ block, change, index, document }: { block: Block; change: (value: Block) => void; index: number; document?: ManuscriptDocument }) {
   switch (block.type) {
+    case 'footnote': return <FootnoteFields block={block} document={document} change={change} />;
     case 'formula': return <><p>Линейная запись Unicode, не LaTeX. В Word экспортируется редактируемая формула.</p><label>Текст формулы<textarea maxLength={20000} value={block.text} onChange={e => change({ ...block, text: e.target.value })} /></label><div aria-label="Предпросмотр формулы">{block.text}</div></>;
     case 'paragraph': return <ParagraphFields block={block} change={change} label={`Текст блока ${index}`} />;
     case 'heading': return <><label>Уровень заголовка<select value={block.level} onChange={e => change({ ...block, level: Number(e.target.value) })}>{[1, 2, 3, 4, 5, 6].map(n => <option key={n}>{n}</option>)}</select></label><label>Текст заголовка<input maxLength={20000} value={block.text} onChange={e => change({ ...block, text: e.target.value })} /></label></>;

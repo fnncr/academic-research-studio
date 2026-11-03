@@ -63,7 +63,12 @@ class ObjectCounter:
 
 def citation_data(document, plan, evidence):
     order = {identifier: index for index, identifier in enumerate(text_nodes(document))}
-    citations = sorted((plan or {}).get('citations', []), key=lambda c: (order.get(c['block_id'], -1), c['selection']['end'], c['id']))
+    anchors = {b['id']: b['anchor'] for b in document['blocks'] if b['type'] == 'footnote'}
+    def position(c):
+        anchor = anchors.get(c['block_id'])
+        if anchor: return (order[anchor['block_id']], anchor['end'], 1, c['selection']['end'], c['id'])
+        return (order.get(c['block_id'], -1), c['selection']['end'], 0, 0, c['id'])
+    citations = sorted((plan or {}).get('citations', []), key=position)
     bibliography_ids = []
     by_node = {}
     for citation in citations:
@@ -89,9 +94,11 @@ def add_text(paragraph, node, citations, math=False):
         item.italic = 'italic' in marks if marks else None
     previous = 0
     encoded = text.encode('utf-16-le')
-    for end, number, label in citations.get(node['id'], []):
+    for end, number, label in sorted(citations.get(node['id'], []), key=lambda event: event[0]):
         index = len(encoded[:end * 2].decode('utf-16-le'))
         run(text[previous:index]); previous = index
+        if isinstance(label, int):
+            r = paragraph.add_run(); r.font.superscript = True; r._r.append(element('w:footnoteReference', id=label)); continue
         link = element('w:hyperlink', anchor=f'source_{number}')
         r = element('w:r'); t = element('w:t'); t.text = label; r.append(t); link.append(r)
         paragraph._p.append(link)
@@ -172,6 +179,8 @@ def generate_docx(document, plan, evidence, sources, request, report):
         field(p, ' TOC \\o "1-6" \\h \\z \\u ', headings or 'Обновите поле оглавления в Word.')
         doc.add_page_break()
     bibliography_ids, citations = citation_data(document, plan, evidence)
+    from app.word_footnotes import add_footnotes
+    add_footnotes(doc, document, citations, add_text)
     counter = ObjectCounter()
     for block in document['blocks']:
         kind = block['type']
@@ -180,6 +189,8 @@ def generate_docx(document, plan, evidence, sources, request, report):
             if kind == 'quote':
                 p.paragraph_format.left_indent = Cm(1); p.paragraph_format.right_indent = Cm(1)
             add_text(p, block, citations)
+        elif kind == 'footnote':
+            continue  # Native footnotes are emitted in their dedicated OOXML part.
         elif kind == 'formula':
             p = doc.add_paragraph(); p.alignment = WD_ALIGN_PARAGRAPH.CENTER; p.paragraph_format.first_line_indent = Cm(0)
             add_text(p, block, citations, math=True)

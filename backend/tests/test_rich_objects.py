@@ -46,3 +46,15 @@ def test_formula_history_and_citation(export_work):
     response,_=download(client,path,{**body,'manuscript_revision_id':saved['id'],'plan_revision_id':new_plan.json()['id']})
     assert part(response.content).xpath('//*[local-name()="oMath"]')
     assert client.get(path+'/manuscript/revisions/'+old['id']).json()['document']==old['document']
+
+
+def test_native_footnote_and_stale_anchor():
+    p=node('paragraph',text='А🧪Б')
+    note=node('footnote',text='Примечание автора',anchor={'block_id':p['id'],'start':1,'end':3,'quote':'🧪'})
+    doc={'schema_version':'2','blocks':[p,note]}
+    ManuscriptDocument.model_validate(doc)
+    output=render(doc)
+    assert part(output).xpath('//*[local-name()="footnoteReference"]')
+    assert 'Примечание автора' in ''.join(part(output,'word/footnotes.xml').itertext())
+    p['text']='Изменённый текст'
+    with pytest.raises(ValidationError): ManuscriptDocument.model_validate(doc)
