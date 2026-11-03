@@ -8,6 +8,7 @@ function ParagraphFields({ block, change, label }: { block: Paragraph; change: (
 
 export default function ManuscriptBlock({ block, change, index }: { block: Block; change: (value: Block) => void; index: number }) {
   switch (block.type) {
+    case 'formula': return <><p>Линейная запись Unicode, не LaTeX. В Word экспортируется редактируемая формула.</p><label>Текст формулы<textarea maxLength={20000} value={block.text} onChange={e => change({ ...block, text: e.target.value })} /></label><div aria-label="Предпросмотр формулы">{block.text}</div></>;
     case 'paragraph': return <ParagraphFields block={block} change={change} label={`Текст блока ${index}`} />;
     case 'heading': return <><label>Уровень заголовка<select value={block.level} onChange={e => change({ ...block, level: Number(e.target.value) })}>{[1, 2, 3, 4, 5, 6].map(n => <option key={n}>{n}</option>)}</select></label><label>Текст заголовка<input maxLength={20000} value={block.text} onChange={e => change({ ...block, text: e.target.value })} /></label></>;
     case 'quote': return <label>Текст цитаты (ссылку добавьте отдельно)<textarea maxLength={20000} value={block.text} onChange={e => change({ ...block, text: e.target.value })} /></label>;

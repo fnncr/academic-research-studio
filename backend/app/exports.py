@@ -19,7 +19,7 @@ from app.projects import DB, get_project, problem
 from app.source_schema import SourceMetadata
 
 router = APIRouter(prefix='/api/projects/{project_id}/exports', tags=['exports'])
-GENERATOR_VERSION = 'docx-1'
+GENERATOR_VERSION = 'docx-2-formulas'
 slots = threading.BoundedSemaphore(2)
 
 
@@ -135,7 +135,7 @@ def preflight(db, project_id, body):
         add('warnings', 'tight_layout', 'Крупный шрифт или узкая полоса текста могут ухудшить переносы и таблицы.')
     if body.profile.toc:
         add('info', 'toc_update', 'В Word обновите оглавление и поля (Ctrl+A, F9). Номера страниц вычисляет офисный редактор.')
-    add('info', 'unsupported_objects', 'Модель P2 не содержит рисунков, подписей, формул, сносок и объединённых ячеек. Эти объекты не создаются.')
+    add('info', 'unsupported_objects', 'Модель P2 не содержит рисунков, подписей, сносок и объединённых ячеек. Эти объекты не создаются.')
     add('info', 'format_scope', 'Числовой стиль numeric-v1 и пользовательский профиль не заявляют соответствия ГОСТ или стандарту университета. Для точного титула нужен образец.')
     add('info', 'manual_reference_scope', 'Проверяются структурированные citations P4. Вручную набранные ссылки и библиографические строки не распознаются автоматически.')
     add('info', 'font_availability', 'Для одинаковой вёрстки в Word должен быть установлен выбранный шрифт.')
