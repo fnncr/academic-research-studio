@@ -13,6 +13,7 @@ from app.database import project_engine
 from app.projects import router as projects_router
 from app.manuscripts import router as manuscripts_router
 from app.sources import router as sources_router
+from app.evidence import router as evidence_router
 
 MAX_UPLOAD = 10 * 1024 * 1024
 TIMEOUT = 15
@@ -40,6 +41,7 @@ app = FastAPI(title='Academic Research Studio', lifespan=lifespan)
 app.include_router(projects_router)
 app.include_router(manuscripts_router)
 app.include_router(sources_router)
+app.include_router(evidence_router)
 
 
 @app.middleware('http')
