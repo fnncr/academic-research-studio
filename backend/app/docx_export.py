@@ -189,6 +189,16 @@ def generate_docx(document, plan, evidence, sources, request, report):
             if kind == 'quote':
                 p.paragraph_format.left_indent = Cm(1); p.paragraph_format.right_indent = Cm(1)
             add_text(p, block, citations)
+        elif kind == 'image':
+            from app.png_images import read_png
+            data, pixel_width, pixel_height = read_png(block['png_base64'])
+            width = min(block['width_cm'], 21-profile.margin_left_cm-profile.margin_right_cm, (29.7-profile.margin_top_cm-profile.margin_bottom_cm-3)*pixel_width/pixel_height)
+            p = doc.add_paragraph(); p.alignment = WD_ALIGN_PARAGRAPH.CENTER; p.paragraph_format.first_line_indent = Cm(0)
+            p.paragraph_format.space_before = Pt(6); p.paragraph_format.space_after = Pt(6); p.paragraph_format.keep_with_next = True
+            shape = p.add_run().add_picture(BytesIO(data), width=Cm(width), height=Cm(width*pixel_height/pixel_width)); shape._inline.docPr.set('descr', block['alt'])
+            caption = doc.add_paragraph(f'Рисунок {counter.next("figure")}' + (' — ' if block['text'] else ''))
+            caption.paragraph_format.first_line_indent = Cm(0); caption.alignment = WD_ALIGN_PARAGRAPH.CENTER
+            add_text(caption, block, citations)
         elif kind == 'footnote':
             continue  # Native footnotes are emitted in their dedicated OOXML part.
         elif kind == 'formula':
@@ -200,7 +210,7 @@ def generate_docx(document, plan, evidence, sources, request, report):
                 p = doc.add_paragraph(); p.paragraph_format.first_line_indent = Cm(-0.5); p.paragraph_format.left_indent = Cm(0.75)
                 num = element('w:numPr'); num.append(element('w:ilvl', val=0)); num.append(element('w:numId', val=num_id)); p._p.get_or_add_pPr().append(num)
                 add_text(p, item, citations)
-        elif kind == 'table':
+        elif kind in ('table', 'merged_table'):
             number = counter.next('table')
             if profile.number_tables:
                 p = doc.add_paragraph(f'Таблица {number}'); p.paragraph_format.first_line_indent = Cm(0); p.paragraph_format.keep_with_next = True
@@ -210,7 +220,12 @@ def generate_docx(document, plan, evidence, sources, request, report):
             for column in table.columns: column.width = width
             for row_index, row in enumerate(rows):
                 for col_index, cell in enumerate(row['cells']):
-                    target = table.cell(row_index, col_index); target.width = width; target.vertical_alignment = WD_CELL_VERTICAL_ALIGNMENT.CENTER
+                    if cell.get('covered_by'): continue
+                    target = table.cell(row_index, col_index)
+                    if cell.get('row_span', 1) > 1 or cell.get('col_span', 1) > 1:
+                        target = target.merge(table.cell(row_index + cell['row_span'] - 1, col_index + cell['col_span'] - 1))
+                        target.text = ''
+                    target.width = width * cell.get('col_span', 1); target.vertical_alignment = WD_CELL_VERTICAL_ALIGNMENT.CENTER
                     p = target.paragraphs[0]; p.paragraph_format.first_line_indent = Cm(0); p.alignment = WD_ALIGN_PARAGRAPH.LEFT
                     add_text(p, cell, citations)
             # No guessed header row or caption text. Table Grid supplies all borders.

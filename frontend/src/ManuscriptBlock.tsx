@@ -1,3 +1,5 @@
+import ImageFields from './ImageFields';
+import MergedTableFields from './MergedTableFields';
 import FootnoteFields from './FootnoteFields';
 import { cell, paragraph, type Block, type Paragraph, type ManuscriptDocument } from './manuscript';
 
@@ -9,6 +11,8 @@ function ParagraphFields({ block, change, label }: { block: Paragraph; change: (
 
 export default function ManuscriptBlock({ block, change, index, document }: { block: Block; change: (value: Block) => void; index: number; document?: ManuscriptDocument }) {
   switch (block.type) {
+    case 'image': return <ImageFields block={block} change={change} />;
+    case 'merged_table': return <MergedTableFields block={block} change={change} />;
     case 'footnote': return <FootnoteFields block={block} document={document} change={change} />;
     case 'formula': return <><p>Линейная запись Unicode, не LaTeX. В Word экспортируется редактируемая формула.</p><label>Текст формулы<textarea maxLength={20000} value={block.text} onChange={e => change({ ...block, text: e.target.value })} /></label><div aria-label="Предпросмотр формулы">{block.text}</div></>;
     case 'paragraph': return <ParagraphFields block={block} change={change} label={`Текст блока ${index}`} />;
@@ -19,7 +23,7 @@ export default function ManuscriptBlock({ block, change, index, document }: { bl
       {block.items.map((item, i) => <div className="list-item" key={item.id}><ParagraphFields block={item} label={`Пункт ${i + 1}`} change={next => change({ ...block, items: block.items.map(old => old.id === next.id ? next : old) })} />
         <button type="button" disabled={block.items.length === 1} onClick={() => change({ ...block, items: block.items.filter(old => old.id !== item.id) })}>Удалить пункт {i + 1}</button></div>)}
       <button type="button" disabled={block.items.length >= 200} onClick={() => change({ ...block, items: [...block.items, paragraph()] })}>Добавить пункт</button></>;
-    case 'table': return <><div className="table-scroll"><table><tbody>{block.rows.map((row, r) => <tr key={row.id}>{row.cells.map((c, col) => <td key={c.id}><textarea aria-label={`Строка ${r + 1}, столбец ${col + 1}`} maxLength={20000} value={c.text} onChange={e => change({ ...block, rows: block.rows.map(oldRow => oldRow.id === row.id ? { ...row, cells: row.cells.map(old => old.id === c.id ? { ...c, text: e.target.value } : old) } : oldRow) })} /></td>)}</tr>)}</tbody></table></div>
+    case 'table': return <><button type="button" onClick={()=>change({...block,type:'merged_table',rows:block.rows.map(r=>({...r,cells:r.cells.map(c=>({...c,row_span:1,col_span:1,covered_by:null}))}))})}>Включить объединение ячеек</button><div className="table-scroll"><table><tbody>{block.rows.map((row, r) => <tr key={row.id}>{row.cells.map((c, col) => <td key={c.id}><textarea aria-label={`Строка ${r + 1}, столбец ${col + 1}`} maxLength={20000} value={c.text} onChange={e => change({ ...block, rows: block.rows.map(oldRow => oldRow.id === row.id ? { ...row, cells: row.cells.map(old => old.id === c.id ? { ...c, text: e.target.value } : old) } : oldRow) })} /></td>)}</tr>)}</tbody></table></div>
       <div className="editor-actions"><button type="button" disabled={block.rows.length >= 100} onClick={() => change({ ...block, rows: [...block.rows, { id: crypto.randomUUID(), cells: block.rows[0].cells.map(() => cell()) }] })}>Добавить строку</button>
         <button type="button" disabled={block.rows[0].cells.length >= 20} onClick={() => change({ ...block, rows: block.rows.map(row => ({ ...row, cells: [...row.cells, cell()] })) })}>Добавить столбец</button>
         <button type="button" disabled={block.rows.length === 1} onClick={() => change({ ...block, rows: block.rows.slice(0, -1) })}>Удалить последнюю строку</button>
