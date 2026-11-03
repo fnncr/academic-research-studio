@@ -94,3 +94,15 @@ FastAPI обслуживает API; React/TypeScript с Vite — интерфе�
 ## Экспорт Word (P5)
 
 В рукописи нажмите «Открыть экспорт Word». Выберите сохранённые версии рукописи и научного плана, стиль, профиль и титульные данные; выполните предварительную проверку и скачайте DOCX. Поддержаны структура P2, таблицы, колонтитулы/страницы, поле оглавления и ссылки на точные SourceVersion. [Руководство, воспроизводимость и ограничения](docs/exports.md). Начальный профиль — пользовательский пример, не официальный стандарт университета или проверенное оформление ГОСТ. Новых миграций и зависимостей нет.
+
+### P6: critical foundation (mock only)
+
+[P6 architecture](docs/p6-architecture.md) and
+[Sol implementation handoff](docs/p6-implementation-handoff.md) specify bounded
+model jobs, budgets, exact-context consent and safe section acceptance. The
+internal `app.model_jobs.ModelJobs` service and `app.model_worker.run_once` use
+PostgreSQL and a local mock; no AI API routes or real provider are enabled.
+Apply additive migration `0005_model_jobs` via the existing Alembic setup.
+`TEST_DATABASE_URL=… python -m pytest -q tests/test_model_jobs.py` runs the
+foundation invariants from `backend/`. No model API key is required. Existing
+manual editing, evidence and DOCX export remain independent of model execution.
