@@ -150,6 +150,12 @@ async def listing(project_id: UUID, request: Request, limit: int = Query(20,ge=1
     return [public(j) for j in json.loads(response.body)]
 
 
+@router.get('/by-request/{request_id}')
+async def by_request(project_id: UUID, request_id: UUID, request: Request):
+    response = await call(request,'by_request',project_id,request_id)
+    return public(json.loads(response.body))
+
+
 @router.get('/{job_id}')
 @router.get('/{job_id}/result')
 async def read(project_id: UUID, job_id: UUID, request: Request):

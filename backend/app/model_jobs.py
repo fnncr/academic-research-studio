@@ -111,6 +111,9 @@ class ModelJobs:
             job = db.scalar(select(ModelJob).where(ModelJob.project_id == project_id, ModelJob.id == job_id))
             require(job is not None, 'not_found')
             result = view(job)
+            result['task'] = job.input_json['task']
+            receipt = db.get(ModelAcceptance, job.id)
+            result['acceptance'] = receipt_view(receipt) if receipt else None
             settled = db.get(ModelSettlement, job.id)
             result['charged_units'] = settled.charged_units if settled else None
             result['held_units'] = 0 if settled else job.reserved_units
@@ -395,3 +398,10 @@ class ModelJobs:
             self._audit(db, project_id, record.id, 'human_review', submission.request_id, actor,
                 {'subject_job_id':str(source.id), 'result_hash':review.result_hash, 'review_hash':digest(record.result)})
             return view(record)
+
+
+    def by_request(self, project_id, request_id):
+        with Session(self.engine) as db:
+            job = db.scalar(select(ModelJob).where(ModelJob.project_id==project_id, ModelJob.request_id==request_id))
+            require(job is not None, 'not_found')
+            return self.read(project_id, job.id)
