@@ -58,3 +58,17 @@ def test_native_footnote_and_stale_anchor():
     assert 'Примечание автора' in ''.join(part(output,'word/footnotes.xml').itertext())
     p['text']='Изменённый текст'
     with pytest.raises(ValidationError): ManuscriptDocument.model_validate(doc)
+
+
+def test_merged_grid_preserves_ids_and_exports_spans():
+    cells=[[{'id':str(uuid4()),'text':'Начало' if r==c==0 else '', 'row_span':2 if r==c==0 else 1,'col_span':2 if r==c==0 else 1,'covered_by':None} for c in range(2)] for r in range(2)]
+    for r in range(2):
+        for c in range(2):
+            if r or c: cells[r][c]['covered_by']=cells[0][0]['id']
+    table=node('merged_table',rows=[{'id':str(uuid4()),'cells':row} for row in cells])
+    doc={'schema_version':'2','blocks':[table]}
+    ManuscriptDocument.model_validate(doc)
+    root=part(render(doc))
+    assert root.xpath('//*[local-name()="gridSpan"]') and root.xpath('//*[local-name()="vMerge"]')
+    cells[1][1]['text']='Не терять'
+    with pytest.raises(ValidationError): ManuscriptDocument.model_validate(doc)

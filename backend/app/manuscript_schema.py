@@ -60,6 +60,40 @@ class Table(Node):
         return self
 
 
+class MergeCell(Cell):
+    row_span: Annotated[int, Field(strict=True, ge=1, le=100)] = 1
+    col_span: Annotated[int, Field(strict=True, ge=1, le=20)] = 1
+    covered_by: UUID | None = None
+
+
+class MergeRow(Node):
+    cells: list[MergeCell] = Field(min_length=1, max_length=20)
+
+
+class MergedTable(Node):
+    type: Literal['merged_table']
+    rows: list[MergeRow] = Field(min_length=1, max_length=100)
+
+    @model_validator(mode='after')
+    def topology(self):
+        height = len(self.rows); width = len(self.rows[0].cells)
+        if any(len(row.cells) != width for row in self.rows): raise ValueError('Ragged grid')
+        owners = {}
+        for r, row in enumerate(self.rows):
+            for c, cell in enumerate(row.cells):
+                if cell.covered_by is not None: continue
+                if r + cell.row_span > height or c + cell.col_span > width: raise ValueError('Span outside grid')
+                for rr in range(r, r + cell.row_span):
+                    for cc in range(c, c + cell.col_span):
+                        if (rr, cc) in owners: raise ValueError('Overlapping spans')
+                        owners[(rr, cc)] = cell.id
+        for r, row in enumerate(self.rows):
+            for c, cell in enumerate(row.cells):
+                if owners.get((r,c)) != (cell.covered_by or cell.id): raise ValueError('Invalid covered cell')
+                if cell.covered_by and (cell.text or cell.row_span != 1 or cell.col_span != 1): raise ValueError('Covered content would be lost')
+        return self
+
+
 class FootnoteAnchor(StrictModel):
     block_id: UUID
     start: Annotated[int, Field(strict=True, ge=0, le=40000)]
@@ -84,7 +118,7 @@ class CitationPlaceholder(Node):
     locator: Label = ''
 
 
-Block = Annotated[Paragraph | Heading | Quote | ListBlock | Table | CitationPlaceholder | Formula | Footnote,
+Block = Annotated[Paragraph | Heading | Quote | ListBlock | Table | CitationPlaceholder | Formula | Footnote | MergedTable,
                   Field(discriminator='type')]
 
 
@@ -94,7 +128,7 @@ class ManuscriptDocument(StrictModel):
 
     @model_validator(mode='after')
     def safe_tree(self):
-        if self.schema_version == '1' and any(b.type in ('formula', 'footnote') for b in self.blocks):
+        if self.schema_version == '1' and any(b.type in ('formula', 'footnote', 'merged_table') for b in self.blocks):
             raise ValueError('New objects require schema 2')
         ids = set()
         characters = 0

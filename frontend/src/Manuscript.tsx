@@ -63,7 +63,7 @@ export default function Manuscript({ projectId, onDirty }: { projectId: string; 
     finally { setBusy(false); }
   }
   function edit(next: ManuscriptDocument) {
-    setUndo(previous => [...previous.slice(-29), draft]); setRedo([]); setDraft(next.blocks.some(b => ['formula', 'footnote'].includes(b.type)) ? { ...next, schema_version: '2' } : next); setRestoredFrom(null); setStatus('');
+    setUndo(previous => [...previous.slice(-29), draft]); setRedo([]); setDraft(next.blocks.some(b => ['formula', 'footnote', 'merged_table'].includes(b.type)) ? { ...next, schema_version: '2' } : next); setRestoredFrom(null); setStatus('');
   }
   function replace(block: Block) { edit({ ...draft, blocks: draft.blocks.map(old => old.id === block.id ? block : old) }); }
   function move(index: number, direction: number) {

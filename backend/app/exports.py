@@ -19,7 +19,7 @@ from app.projects import DB, get_project, problem
 from app.source_schema import SourceMetadata
 
 router = APIRouter(prefix='/api/projects/{project_id}/exports', tags=['exports'])
-GENERATOR_VERSION = 'docx-3-footnotes'
+GENERATOR_VERSION = 'docx-4-merged-cells'
 slots = threading.BoundedSemaphore(2)
 
 
@@ -128,14 +128,14 @@ def preflight(db, project_id, body):
             previous_level = block['level']
         elif block['type'] == 'quote' and block['id'] not in cited_nodes:
             add('warnings', 'unlinked_quote', 'Цитатный блок не имеет связи с Evidence. Укажите источник или проверьте назначение блока.', block_id=block['id'])
-        elif block['type'] == 'table':
+        elif block['type'] in ('table', 'merged_table'):
             if len(block['rows'][0]['cells']) > 6:
                 add('warnings', 'wide_table', 'Широкая таблица может потребовать ручного уменьшения шрифта или ширины.', block_id=block['id'])
     if body.profile.font_size >= 18 or body.profile.margin_left_cm + body.profile.margin_right_cm >= 8:
         add('warnings', 'tight_layout', 'Крупный шрифт или узкая полоса текста могут ухудшить переносы и таблицы.')
     if body.profile.toc:
         add('info', 'toc_update', 'В Word обновите оглавление и поля (Ctrl+A, F9). Номера страниц вычисляет офисный редактор.')
-    add('info', 'unsupported_objects', 'Модель P2 не содержит рисунков, подписей и объединённых ячеек. Эти объекты не создаются.')
+    add('info', 'unsupported_objects', 'Модель P2 не содержит рисунков и подписей. Эти объекты не создаются.')
     add('info', 'format_scope', 'Числовой стиль numeric-v1 и пользовательский профиль не заявляют соответствия ГОСТ или стандарту университета. Для точного титула нужен образец.')
     add('info', 'manual_reference_scope', 'Проверяются структурированные citations P4. Вручную набранные ссылки и библиографические строки не распознаются автоматически.')
     add('info', 'font_availability', 'Для одинаковой вёрстки в Word должен быть установлен выбранный шрифт.')

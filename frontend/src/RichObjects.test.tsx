@@ -12,3 +12,10 @@ it('edits footnote text without changing its anchor or UUID', async () => {
  render(<ManuscriptBlock block={block} document={{schema_version:'2',blocks:[{id:'p1',type:'quote',text:'А'},block]}} change={change} index={2} />);
  await userEvent.setup().type(screen.getByLabelText('Текст сноски'),'Б'); expect(change).toHaveBeenLastCalledWith({...block,text:'Б'});
 });
+import { mergeRectangle } from './MergedTableFields';
+import type { MergedTable } from './manuscript';
+it('merges a rectangle without dropping IDs or nonempty cell content', () => {
+ const table=newBlock('merged_table') as MergedTable; const ids=table.rows.flatMap(r=>r.cells.map(c=>c.id));
+ const next=mergeRectangle(table,0,0,1,1); expect(next.rows.flatMap(r=>r.cells.map(c=>c.id))).toEqual(ids); expect(next.rows[1].cells[1].covered_by).toBe(ids[0]);
+ table.rows[1].cells[1].text='Не терять'; expect(()=>mergeRectangle(table,0,0,1,1)).toThrow();
+});
