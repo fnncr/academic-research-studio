@@ -193,3 +193,17 @@ class ModelAcceptance(Base):
     manuscript_revision_id: Mapped[UUID] = mapped_column(ForeignKey('manuscript_revisions.id'))
     plan_revision_id: Mapped[UUID] = mapped_column(ForeignKey('research_plan_revisions.id'))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class ModelAudit(Base):
+    __tablename__ = 'model_audit'
+    __table_args__ = (UniqueConstraint('project_id', 'action', 'request_id', name='uq_model_audit_request'),)
+    id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
+    project_id: Mapped[UUID] = mapped_column(ForeignKey('projects.id'))
+    job_id: Mapped[UUID | None] = mapped_column(ForeignKey('model_jobs.id'))
+    action: Mapped[str] = mapped_column(String(30))
+    request_id: Mapped[UUID] = mapped_column()
+    actor: Mapped[str] = mapped_column(String(100))
+    request_hash: Mapped[str] = mapped_column(String(64))
+    details: Mapped[dict] = mapped_column(JSONB)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())

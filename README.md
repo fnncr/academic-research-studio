@@ -106,3 +106,10 @@ Apply additive migration `0005_model_jobs` via the existing Alembic setup.
 `TEST_DATABASE_URL=… python -m pytest -q tests/test_model_jobs.py` runs the
 foundation invariants from `backend/`. No model API key is required. Existing
 manual editing, evidence and DOCX export remain independent of model execution.
+
+P6 Task A adds the [owner-only API and supervised mock worker](docs/p6-task-a.md),
+immutable decision audit (migration 0006), budget reconciliation/unfreeze and an
+optional Compose `models` profile. Set `MODEL_OWNER_TOKEN` for the API; all model
+providers remain mock-only until a real provider is approved. Manual workflows
+remain available when model API is disabled. See the runbook for the personal
+single-owner deployment boundary and explicit limits of these checks.
