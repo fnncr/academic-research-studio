@@ -46,3 +46,50 @@ class ManuscriptRevision(Base):
     content_hash: Mapped[str] = mapped_column(String(64))
     document: Mapped[dict] = mapped_column(JSONB)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class Source(Base):
+    __tablename__ = 'sources'
+    __table_args__ = (UniqueConstraint('project_id', 'request_id', name='uq_source_request'),)
+    id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
+    project_id: Mapped[UUID] = mapped_column(ForeignKey('projects.id'), index=True)
+    request_id: Mapped[UUID] = mapped_column()
+    request_hash: Mapped[str] = mapped_column(String(64))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class SourceVersion(Base):
+    __tablename__ = 'source_versions'
+    __table_args__ = (UniqueConstraint('source_id', 'number', name='uq_source_version_number'),
+                     UniqueConstraint('source_id', 'request_id', name='uq_source_version_request'),
+                     CheckConstraint('number > 0', name='ck_source_version_number'))
+    id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
+    source_id: Mapped[UUID] = mapped_column(ForeignKey('sources.id'), index=True)
+    number: Mapped[int] = mapped_column(Integer)
+    request_id: Mapped[UUID] = mapped_column()
+    request_hash: Mapped[str] = mapped_column(String(64))
+    metadata_json: Mapped[dict] = mapped_column(JSONB)
+    provenance: Mapped[dict] = mapped_column(JSONB)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class SourceIdentifier(Base):
+    __tablename__ = 'source_identifiers'
+    project_id: Mapped[UUID] = mapped_column(ForeignKey('projects.id'), primary_key=True)
+    kind: Mapped[str] = mapped_column(String(4), primary_key=True)
+    value: Mapped[str] = mapped_column(String(255), primary_key=True)
+    source_id: Mapped[UUID] = mapped_column(ForeignKey('sources.id'), index=True)
+
+
+class SearchRun(Base):
+    __tablename__ = 'search_runs'
+    __table_args__ = (UniqueConstraint('project_id', 'request_id', name='uq_search_request'),)
+    id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
+    project_id: Mapped[UUID] = mapped_column(ForeignKey('projects.id'), index=True)
+    request_id: Mapped[UUID] = mapped_column()
+    request_hash: Mapped[str] = mapped_column(String(64))
+    request_json: Mapped[dict] = mapped_column(JSONB)
+    source_version_id: Mapped[UUID | None] = mapped_column(ForeignKey('source_versions.id'))
+    status: Mapped[str] = mapped_column(String(20))
+    results: Mapped[list] = mapped_column(JSONB)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
