@@ -59,3 +59,13 @@ it('explains billing drift without resending the task',async()=>{
  render(<ModelAssistant projectId="x" unsaved={false} onBusy={busy} onAccepted={accepted}/>);await connect();
  expect(await screen.findByText(/Тарификация ответа провайдера не подтверждена/)).toBeVisible();expect(s.mutations).toHaveLength(0);
 });
+
+it('keeps the documented Sol candidate unavailable without inventing a quote or sending',async()=>{
+ const s=server();const original=s.fetch.getMockImplementation()!;
+ s.fetch.mockImplementation(async(url:string,options?:RequestInit)=>url.endsWith('/capabilities')?{ok:true,status:200,json:async()=>({providers:[{id:'mock',model:'mock-grounded-v1',ready:true}],unavailable_models:[{model:'gpt-6.1-sol',status:'blocked',modes:[{name:'Deep Academic Writing',proposed_effort:'high'}]}]})}:original(url,options));
+ render(<ModelAssistant projectId="x" unsaved={false} onBusy={busy} onAccepted={accepted}/>);await connect();
+ expect(await screen.findByText(/gpt-6.1-sol — запуск заблокирован/)).toBeVisible();
+ expect(screen.getByText(/Deep Academic Writing/)).toBeVisible();
+ expect(screen.getByLabelText('Провайдер и модель').querySelector('option[value="gpt-6.1-sol"]')).toBeNull();
+ expect(s.mutations).toHaveLength(0);
+});

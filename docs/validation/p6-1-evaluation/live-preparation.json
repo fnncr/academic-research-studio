@@ -1,0 +1,84 @@
+{
+  "model": "gpt-6.1-sol",
+  "live_status": "blocked",
+  "provider_calls": 0,
+  "estimated_cost_units": null,
+  "maximum_reservation_units": null,
+  "actual_cost_units": null,
+  "blockers": [
+    "adapter_and_billing_review",
+    "owner_approval",
+    "account_and_network_access"
+  ],
+  "cases": [
+    {
+      "case": "economics",
+      "structural_validity": "not_run",
+      "scientific_adequacy": {
+        "status": "requires_expert_review",
+        "checks": [
+          "Сопоставлены спрос и издержки",
+          "Нет универсальной причинности",
+          "Каждое внешнее утверждение опирается на Evidence",
+          "Нет вымышленных фактов",
+          "Цитаты точны по смыслу и контексту",
+          "Противоречия сохранены"
+        ]
+      },
+      "writing_quality": {
+        "status": "requires_expert_review",
+        "checks": [
+          "Академический стиль",
+          "Сопоставление позиций вместо коллажа",
+          "Полезность для дальнейшего исследования"
+        ]
+      }
+    },
+    {
+      "case": "management",
+      "structural_validity": "not_run",
+      "scientific_adequacy": {
+        "status": "requires_expert_review",
+        "checks": [
+          "Сравнены оба подхода",
+          "Названы условия применимости",
+          "Каждое внешнее утверждение опирается на Evidence",
+          "Нет вымышленных фактов",
+          "Цитаты точны по смыслу и контексту",
+          "Противоречия сохранены"
+        ]
+      },
+      "writing_quality": {
+        "status": "requires_expert_review",
+        "checks": [
+          "Академический стиль",
+          "Сопоставление позиций вместо коллажа",
+          "Полезность для дальнейшего исследования"
+        ]
+      }
+    },
+    {
+      "case": "fintech",
+      "structural_validity": "not_run",
+      "scientific_adequacy": {
+        "status": "requires_expert_review",
+        "checks": [
+          "Сопоставлены выгоды и риски",
+          "Не выдуманы денежные эффекты",
+          "Каждое внешнее утверждение опирается на Evidence",
+          "Нет вымышленных фактов",
+          "Цитаты точны по смыслу и контексту",
+          "Противоречия сохранены"
+        ]
+      },
+      "writing_quality": {
+        "status": "requires_expert_review",
+        "checks": [
+          "Академический стиль",
+          "Сопоставление позиций вместо коллажа",
+          "Полезность для дальнейшего исследования"
+        ]
+      }
+    }
+  ]
+}
