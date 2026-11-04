@@ -17,9 +17,9 @@ from app.evidence import MAX_BODY as PLAN_MAX_BODY, latest_plan, validate_plan
 from app.evidence_schema import SavePlan
 from app.manuscript_schema import ManuscriptDocument
 from app.manuscripts import MAX_BODY, current_revision, digest
-from app.model_context import SYSTEM_RULES, assemble_context, require, validate_proposal
+from app.model_context import ModelProblem, SYSTEM_RULES, assemble_context, require, validate_proposal
 from app.model_contracts import AcceptanceSpec, Consent, TaskSpec
-from app.model_gateway import MockGateway
+from app.model_gateway import MockGateway, gateway_for, check_ready, GatewayUnavailable
 from app.models import (ModelAudit, ModelAcceptance, ModelBudget, ModelJob, ModelSettlement,
                         ManuscriptRevision, ResearchPlanRevision, PlanEvidenceReference)
 from app.projects import get_project
@@ -53,15 +53,18 @@ class ModelJobs:
 
     def _preview(self, db, project_id, spec):
         packet = assemble_context(db, project_id, spec)
-        if spec.kind == 'writing':
+        if spec.provider == 'openai':
+            pass  # Real generation has no template-composition admission requirement.
+        elif spec.kind == 'writing':
             from app.grounded_writing import compose
             compose(packet, spec)  # Output capacity fails before reserving a budget.
         else:
             from app.semantic_review import local_review
             local_review(packet, spec)
-        quote = asdict(MockGateway().quote(packet, spec))
+        quote = asdict(gateway_for(spec.provider).quote(packet, spec))
+        from app.model_adapters.openai_chat import DISCLOSURE
         data = {'task': spec.model_dump(mode='json'), 'context': packet, 'quote': quote,
-                'disclosure': 'mock-local-v1: no external transmission or provider retention'}
+                'disclosure': DISCLOSURE if spec.provider == 'openai' else 'mock-local-v1: no external transmission or provider retention'}
         return {'fingerprint': digest(data), 'input': data}
 
     def preview(self, project_id: UUID, spec: TaskSpec):
@@ -92,6 +95,11 @@ class ModelJobs:
                 if actor: self._audit(db, project_id, previous.id, 'consent', spec.request_id, actor,
                     {'fingerprint': preview['fingerprint'], 'disclosure': preview['input']['disclosure']})
                 return dict(view(previous), created=False) if with_creation else view(previous)
+            if spec.provider == 'openai':
+                try:
+                    gateway=gateway_for(spec.provider); check_ready(gateway)
+                    require(preview['input']['quote']['max_units'] <= gateway.ready(), 'call_budget_exceeded')
+                except GatewayUnavailable: raise ModelProblem('provider_configuration_unavailable') from None
             budget = db.scalar(select(ModelBudget).where(ModelBudget.project_id == project_id).with_for_update())
             units = preview['input']['quote']['max_units']
             require(budget is not None and budget.currency == preview['input']['quote']['currency'] and
@@ -208,8 +216,9 @@ class ModelJobs:
                     report['execution'] = {'quote': job.input_json['quote'],
                         'input_tokens': reply.input_tokens, 'output_tokens': reply.output_tokens}
                     job.result = proposal.model_dump(mode='json'); job.report = report; job.state = 'succeeded'
-                except (ValueError, ValidationError):
-                    job.state = 'invalid'; job.report = {'code': 'invalid_result', 'semantic': 'uncertain'}
+                except (ValueError, ValidationError) as exc:
+                    job.state = 'invalid'; job.report = {'code': 'invalid_result', 'semantic': 'uncertain',
+                        'validation_code': str(exc) if isinstance(exc, ModelProblem) else 'schema_mismatch'}
             self._settle(db, job, reply.charged_units, 'provider_response', reply.input_tokens, reply.output_tokens)
             return view(job)
 

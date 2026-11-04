@@ -125,3 +125,9 @@ manuscript editor. It previews saved research context, requires request-specific
 consent, tracks/reopens jobs and safely accepts appended sections. The provider
 remains a local mock/template composer. The owner token stays in memory; per-tab
 request UUIDs/settings survive refresh without storing source excerpts or keys.
+
+[P6 Task E](docs/p6-task-e.md) provides an **off-by-default** OpenAI Chat Completions
+adapter with strict structured output, conservative reservations and separate
+application credentials. Review the snapshot's deprecation, pricing/data policy
+and explicit owner activation steps before enabling. Regular tests make no paid
+requests; mock/manual mode stays available. P6 is not declared complete.

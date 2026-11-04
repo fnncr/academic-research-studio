@@ -75,16 +75,24 @@ class GatewayUnavailable(ValueError):
     """Safe startup/configuration error, contains no credential/provider body."""
 
 
+def gateway_for(provider):
+    if provider == 'mock': return MockGateway()
+    if provider == 'openai':
+        from app.model_adapters.openai_chat import OpenAIChat
+        return OpenAIChat()
+    raise GatewayUnavailable('provider_not_approved')
+
+
 def configured_gateway():
     import os
-    if os.environ.get('MODEL_PROVIDER','mock') != 'mock':
-        raise GatewayUnavailable('provider_not_approved')
-    return MockGateway()
+    return gateway_for(os.environ.get('MODEL_PROVIDER','mock'))
 
 
 def check_ready(gateway):
-    if not isinstance(gateway, MockGateway):
-        raise GatewayUnavailable('provider_not_approved')
+    if isinstance(gateway,MockGateway): return
+    from app.model_adapters.openai_chat import OpenAIChat
+    if isinstance(gateway,OpenAIChat): gateway.ready(); return
+    raise GatewayUnavailable('provider_not_approved')
 
 
 def _reject_constant(value):
