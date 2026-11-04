@@ -41,7 +41,7 @@ def adapter(payload,**kwargs):
 def test_production_gate(case,monkeypatch):
     _,_,_,task,packet,_=case
     for key in ('ARS_OPENAI_APPROVAL','ARS_OPENAI_API_KEY','ARS_OPENAI_PRICE_CONFIRMED'):monkeypatch.setenv(key,MODEL)
-    with pytest.raises(GatewayUnavailable,match='sol_not_admitted'):SolResponses().generate(packet,task,uuid4())
+    with pytest.raises(GatewayUnavailable,match='sol_approval_required'):SolResponses().generate(packet,task,uuid4())
 
 @pytest.mark.parametrize('effort',['low','medium','high','xhigh','max'])
 def test_request_and_quote_bind_configuration(case,effort):

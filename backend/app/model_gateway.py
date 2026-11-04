@@ -97,6 +97,8 @@ def check_ready(gateway):
     if isinstance(gateway,MockGateway): return
     from app.model_adapters.openai_chat import OpenAIChat
     if isinstance(gateway,OpenAIChat): gateway.ready(); return
+    from app.model_adapters.openai_responses import SolResponses
+    if isinstance(gateway,SolResponses): gateway.ready(); return
     raise GatewayUnavailable('provider_not_approved')
 
 

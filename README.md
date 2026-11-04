@@ -155,3 +155,7 @@ remain disabled; live quality/billing and owner acceptance remain outstanding.
 [Staged Responses adapter](docs/p6-1-responses-adapter.md) добавляет контрактные
 проверки Sol usage/reasoning/cache/long-context pricing. Production-выполнение
 остаётся заблокированным до отдельной активации и разрешения владельца.
+
+[P6.1 activation и бюджет](docs/p6-1-activation-budget-validation.md): Sol подключён
+к API/queue/UI с обязательными gates, выключен по умолчанию. Новый estimator
+сохраняет консервативный fallback; уменьшение гарантированного резерва пока blocked.

@@ -37,7 +37,8 @@ class TaskSpec(Contract):
     title: Short
     instruction: Text
     provider: Literal['mock', 'openai'] = 'mock'
-    model: Literal['mock-grounded-v1', 'gpt-4.1-mini-2025-04-14'] = 'mock-grounded-v1'
+    model: Literal['mock-grounded-v1', 'gpt-4.1-mini-2025-04-14', 'gpt-6.1-sol'] = 'mock-grounded-v1'
+    reasoning_effort: Literal['low','medium','high','xhigh','max'] | None = None
     kind: Literal['writing', 'semantic_review'] = 'writing'
     review_job_id: UUID | None = None
     review_result_hash: Hash | None = None
@@ -46,6 +47,8 @@ class TaskSpec(Contract):
     @model_validator(mode='after')
     def distinct_claims(self):
         if (self.provider == 'mock') != (self.model == 'mock-grounded-v1'): raise ValueError('Provider/model mismatch')
+        if self.model != 'gpt-6.1-sol' and self.reasoning_effort is not None: raise ValueError('Reasoning only supported by Sol')
+        if self.model == 'gpt-6.1-sol' and self.section_id is None: raise ValueError('Sol requires a selected section')
         if self.kind == 'semantic_review':
             if self.review_job_id is None or self.review_result_hash is None: raise ValueError('Review subject required')
         elif self.review_job_id is not None or self.review_result_hash is not None:

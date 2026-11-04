@@ -23,8 +23,7 @@ def test_candidate_cannot_enqueue_via_raw_http(api):
     before=budget(q,p)
     task=s.model_dump(mode='json')|{'model':'gpt-6.1-sol'}
     caps=c.get(route+'/capabilities').json()
-    assert caps['unavailable_models'][0]['status']=='blocked'
-    assert all(v['model']!='gpt-6.1-sol' for v in caps['providers'])
+    assert next(v for v in caps['providers'] if v['model']=='gpt-6.1-sol')['ready'] is False
     for suffix,body in [('/preview',task),('',{'task':task,'consent':{'approved':True,'fingerprint':'0'*64}})]:
         assert c.post(route+suffix,json=body).status_code==422
     assert budget(q,p)==before and q.claim() is None
