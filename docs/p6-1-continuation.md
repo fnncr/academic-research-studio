@@ -1,7 +1,7 @@
 # Продолжение P6.1
 
 Основание main 513dd2e. PR #25 — read-only compatibility, не Sol adapter.
-Следующая зависимая ветка feat/p6-1-evaluation-ui содержит три сценария,
+PR #26 (https://github.com/fnncr/academic-research-studio/pull/26), зависимая ветка feat/p6-1-evaluation-ui содержит три сценария,
 подготовщик, UI блокировки и раздельного учёта расходов, тесты и документацию.
 Ничего не объединено агентом; платных/counting API вызовов 0.
 
@@ -29,3 +29,5 @@ frontend/src/ModelAssistant.tsx. PR #22–23 финансовая защита �
 умолчанию: blocked без БД/сети. --prepare пишет только синтетические объекты
 в одноразовую мигрированную DATABASE_URL и никогда не вызывает модель.
 P7/P8/P9 не начаты. Не утверждать, что вся P6.1 real integration завершена.
+
+Финальный локальный прогон: 332 backend без skips, 53 frontend, build passed.

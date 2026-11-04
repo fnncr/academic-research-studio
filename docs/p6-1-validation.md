@@ -78,8 +78,8 @@ P61_EVALUATION_ARTIFACT_DIR=/tmp/p61-evaluation \
 
 ## Проверки этой поставки
 
-Полный локальный backend: **331 passed**, zero skips, 60.72 s; затем добавлен
-отдельный тест --prepare и выполнен весь целевой evaluation suite.
+Окончательный полный локальный backend: **332 passed**, zero skips, 57.95 s,
+включая тест --prepare. Отдельный evaluation suite: **5 passed**.
 Frontend: **53 passed**, TypeScript/Vite build passed. Полный backend включает
 миграции upgrade/downgrade/re-upgrade/check, billing faults, queue concurrency,
 consent, injection/UUID/scopes, cancellation/timeouts/restarts, цитаты и DOCX.
@@ -94,3 +94,15 @@ accept, DOCX download, restore без rebasing. Результат записа�
 Перед P7 сохраняются рекомендации p7-readiness.md: локальные формальные правила
 независимы от live P6, реестр 34 критериев не менялся. Sol integration, экспертная
 приёмка, provenance в редакторе и слепая смысловая рецензия остаются открытыми.
+
+## Тарифная справка для будущего контракта
+
+Официальный pricing на дату проверки: Standard input/output $2/$10 за миллион,
+cached input $0.10, 30m/12h cache write $2.50/$5. Для входа свыше 272K действует
+надбавка на весь запрос; fast/ultrafast и regional processing имеют дополнительные
+множители. Эти справочные ставки не являются реализованной Sol quote и не
+подтверждают исчерпывающую верхнюю границу. Cache write usage/control и доступ
+аккаунта остаются блокерами. [Pricing](https://developers.openai.com/api/docs/pricing).
+
+PR: [25](https://github.com/fnncr/academic-research-studio/pull/25) и зависимый
+[26](https://github.com/fnncr/academic-research-studio/pull/26). Не объединены агентом.
