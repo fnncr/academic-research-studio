@@ -69,3 +69,24 @@ it('keeps the documented Sol candidate unavailable without inventing a quote or 
  expect(screen.getByLabelText('Провайдер и модель').querySelector('option[value="gpt-6.1-sol"]')).toBeNull();
  expect(s.mutations).toHaveLength(0);
 });
+
+it('selects Sol modes without sending and requires a new preview',async()=>{
+ const s=server();const original=s.fetch.getMockImplementation()!;
+ s.fetch.mockImplementation(async(url:string,options?:RequestInit)=>url.endsWith('/capabilities')?{ok:true,status:200,json:async()=>({providers:[{id:'mock',model:'mock-grounded-v1',ready:true},{id:'sol',model:'gpt-6.1-sol',ready:false}]})}:original(url,options));
+ render(<ModelAssistant projectId="x" unsaved={false} onBusy={busy} onAccepted={accepted}/>);const user=await connect();
+ await user.selectOptions(screen.getByLabelText('Провайдер и модель'),'sol');
+ await user.selectOptions(screen.getByLabelText('Режим рассуждения'),'high');
+ expect(screen.getByLabelText('Режим рассуждения')).toHaveValue('high');
+ expect(s.mutations).toHaveLength(0);expect(screen.queryByRole('button',{name:'Создать задание'})).toBeNull();
+});
+
+it('prepares review as a separately consented request without automatic enqueue',async()=>{
+ vi.stubGlobal('crypto',{randomUUID:()=>`review-${Math.random()}`,subtle:{digest:async()=>new Uint8Array(32).buffer}});
+ const s=server();persist('x',{jobId:'j1'});s.setJob({id:'j1',task,state:'succeeded',result:{paragraphs:['Scientific draft']},cancel_requested:false});
+ render(<ModelAssistant projectId="x" unsaved={false} onBusy={busy} onAccepted={accepted}/>);const user=await connect();
+ await user.click(await screen.findByRole('button',{name:'Подготовить отдельную смысловую рецензию'}));
+ await screen.findByText('Точный контекст запроса');
+ expect(screen.getByRole('button',{name:'Создать задание'})).toBeDisabled();
+ expect(restore('x').task?.kind).toBe('semantic_review');
+ expect(s.mutations.filter(m=>m.url.endsWith('/model-jobs'))).toHaveLength(0);
+});

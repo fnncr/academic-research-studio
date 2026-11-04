@@ -111,10 +111,14 @@ async def capabilities(project_id: UUID, request: Request):
     try:
         OpenAIChat().ready(); ready=True
     except ValueError: ready=False
-    from app.model_catalog import unavailable_models
-    return {'unavailable_models': unavailable_models(), 'providers': [{'id':'mock','model':'mock-grounded-v1','ready':True},
-            {'id':'openai','model':MODEL,'ready':ready,'disclosure':DISCLOSURE}], 'provider': 'mock', 'model': 'mock-grounded-v1', 'external_enabled': ready,
-            'retention': 'local database only', 'currency': 'USD',
+    from app.model_adapters.openai_responses import sol_gateway,MODEL as SOL_MODEL
+    from types import SimpleNamespace
+    try: sol_gateway(SimpleNamespace(reasoning_effort='medium')).ready(); sol_ready=True
+    except ValueError: sol_ready=False
+    return {'unavailable_models': [], 'providers': [{'id':'mock','model':'mock-grounded-v1','ready':True},
+            {'id':'sol','model':SOL_MODEL,'ready':sol_ready,'disclosure':'Responses: selected originals leave installation; cache/retention policies apply.'},
+            {'id':'openai','model':MODEL,'ready':ready,'disclosure':DISCLOSURE}], 'provider': 'mock', 'model': 'mock-grounded-v1', 'external_enabled': ready or sol_ready,
+            'retention': 'provider-specific; inspect selected disclosure', 'currency': 'USD',
             'token_bound': 'UTF-8 bytes plus framing allowance',
             'paid_retries': False, 'requires_api_key': False}
 

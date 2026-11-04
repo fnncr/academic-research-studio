@@ -33,7 +33,10 @@ def run_once(queue, gateway=None, stop=None):
         try:
             data = queue.worker_input(project, job, token)
             spec = TaskSpec.model_validate(data['task'])
-            gateway = supplied or gateway_for(spec.provider)
+            if spec.model=='gpt-6.1-sol':
+                from app.model_adapters.openai_responses import sol_gateway
+                gateway = supplied or sol_gateway(spec)
+            else: gateway = supplied or gateway_for(spec.provider)
             check_ready(gateway)
             require(asdict(gateway.quote(data['context'], spec)) == data['quote'], 'pricing_changed')
             if spec.provider == 'openai': require(data['quote']['max_units'] <= gateway.ready(), 'call_budget_exceeded')

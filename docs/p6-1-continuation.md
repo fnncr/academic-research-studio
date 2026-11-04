@@ -43,3 +43,12 @@ Production ready() по-прежнему закрыт, allowlist не расши
 network/region/data/budget и отдельному review маршрутизации API/worker.
 Не считать старую fallback-формулировку «adapter отсутствует» актуальным статусом
 реализации: adapter теперь существует, но не допущен к исполнению.
+
+## Актуальное продолжение: controlled activation
+
+Ветка feat/p6-1-sol-activation-budget от main 10fa346 интегрирует Sol в public
+TaskSpec/API/worker/UI. Постоянный ready gate заменён обязательными runtime gates.
+Все прежние staged-only инструкции выше являются историей этапов.
+Текущая инструкция: docs/p6-1-activation-budget-validation.md.
+Гарантированное уменьшение резерва не достигнуто: estimator работает в честном
+fallback, counting не вызывается без отдельного разрешения. Реальных вызовов 0.

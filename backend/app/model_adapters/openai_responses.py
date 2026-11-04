@@ -3,6 +3,7 @@
 Production ready() always fails closed. Only httpx.MockTransport can execute
 this staged adapter; a separate reviewed activation patch is required for live.
 """
+import os
 import json
 import time
 from dataclasses import dataclass
@@ -14,7 +15,7 @@ from app.model_adapters.openai_chat import OpenAIChat, unique_object
 
 MODEL = 'gpt-6.1-sol'
 ENDPOINT = 'https://api.openai.com/v1/responses'
-POLICY = 'sol-responses-staged-2026-11-04-v1'
+POLICY = 'sol-activation-2026-11-04-v1'
 CONTEXT = 1050000
 LONG_CONTEXT = 272000
 EFFORTS = {'low', 'medium', 'high', 'xhigh', 'max'}
@@ -74,8 +75,16 @@ class SolResponses:
         self.transport, self.effort, self.profile = transport, effort, profile
 
     def ready(self):
-        # No environment key, flag, fixture or model alias may enable real calls.
-        raise GatewayUnavailable('sol_not_admitted')
+        for key in ('ARS_SOL_APPROVAL','ARS_SOL_DATA_POLICY','ARS_SOL_PRICE_CONFIRMED'):
+            if os.environ.get(key) != POLICY: raise GatewayUnavailable('sol_approval_required')
+        if os.environ.get('ARS_SOL_MODEL') != MODEL: raise GatewayUnavailable('sol_model_unconfirmed')
+        if os.environ.get('ARS_SOL_REGION') not in ('global','regional'): raise GatewayUnavailable('sol_region_unconfirmed')
+        if self.profile.regional != (os.environ['ARS_SOL_REGION']=='regional'): raise GatewayUnavailable('sol_region_changed')
+        if not os.environ.get('ARS_SOL_API_KEY','').strip(): raise GatewayUnavailable('sol_key_missing')
+        try: limit=int(os.environ.get('ARS_SOL_MAX_UNITS','0'))
+        except ValueError: raise GatewayUnavailable('sol_limit_invalid') from None
+        if not 0<limit<=10**12: raise GatewayUnavailable('sol_limit_invalid')
+        return limit
 
     def body(self, packet, spec):
         require(spec.provider == 'openai' and spec.model == MODEL, 'provider_model_mismatch')
@@ -104,11 +113,14 @@ class SolResponses:
     def generate(self, packet, spec, dispatch_id):
         if not isinstance(self.transport, httpx.MockTransport): self.ready()
         quote = self.quote(packet, spec)
+        if not isinstance(self.transport,httpx.MockTransport) and quote.max_units>self.ready(): raise GatewayUnavailable('sol_call_limit')
+        payload=self.body(packet,spec)
+        require(quote.pricing_version == POLICY+':'+digest({'body':payload,'regional':self.profile.regional}), 'payload_changed')
         started = time.monotonic()
         try:
             with httpx.Client(transport=self.transport, timeout=httpx.Timeout(45,connect=10), follow_redirects=False) as client:
-                with client.stream('POST', ENDPOINT, json=self.body(packet,spec), headers={
-                    'Authorization':'Bearer contract-fixture-only', 'X-Client-Request-Id':str(dispatch_id)}) as response:
+                with client.stream('POST', ENDPOINT, json=payload, headers={
+                    'Authorization':'Bearer '+('contract-fixture-only' if isinstance(self.transport,httpx.MockTransport) else os.environ['ARS_SOL_API_KEY']), 'X-Client-Request-Id':str(dispatch_id)}) as response:
                     if response.status_code != 200: raise AmbiguousOutcome()
                     data = bytearray()
                     for chunk in response.iter_bytes(chunk_size=16384):
@@ -137,3 +149,8 @@ class SolResponses:
             return GatewayReply(result, units, details['input_tokens'], details['output_tokens'], details)
         except AmbiguousOutcome: raise
         except Exception: raise AmbiguousOutcome() from None
+
+
+def sol_gateway(spec):
+    return SolResponses(effort=spec.reasoning_effort or 'medium',
+        profile=BillingProfile(os.environ.get('ARS_SOL_REGION')=='regional'))

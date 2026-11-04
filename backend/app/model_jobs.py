@@ -51,6 +51,12 @@ class ModelJobs:
         require(job is not None, 'not_found')
         return job
 
+    def _gateway(self,spec):
+        if spec.model=='gpt-6.1-sol':
+            from app.model_adapters.openai_responses import sol_gateway
+            return sol_gateway(spec)
+        return gateway_for(spec.provider)
+
     def _preview(self, db, project_id, spec):
         packet = assemble_context(db, project_id, spec)
         if spec.provider == 'openai':
@@ -61,10 +67,15 @@ class ModelJobs:
         else:
             from app.semantic_review import local_review
             local_review(packet, spec)
-        quote = asdict(gateway_for(spec.provider).quote(packet, spec))
+        quote = asdict(self._gateway(spec).quote(packet, spec))
         from app.model_adapters.openai_chat import DISCLOSURE
         data = {'task': spec.model_dump(mode='json'), 'context': packet, 'quote': quote,
                 'disclosure': DISCLOSURE if spec.provider == 'openai' else 'mock-local-v1: no external transmission or provider retention'}
+        if spec.model=='gpt-6.1-sol':
+            from app.budget_estimator import estimate
+            gateway=self._gateway(spec)
+            data['budget_estimate']=estimate(gateway.body(packet,spec),packet,gateway.quote(packet,spec),gateway.profile.regional)
+            data['disclosure']='OpenAI Responses: selected text/originals transmitted; store=false does not imply ZDR; cache and abuse retention apply. '+quote['pricing_version'].split(':')[0]
         return {'fingerprint': digest(data), 'input': data}
 
     def preview(self, project_id: UUID, spec: TaskSpec):
@@ -97,7 +108,7 @@ class ModelJobs:
                 return dict(view(previous), created=False) if with_creation else view(previous)
             if spec.provider == 'openai':
                 try:
-                    gateway=gateway_for(spec.provider); check_ready(gateway)
+                    gateway=self._gateway(spec); check_ready(gateway)
                     require(preview['input']['quote']['max_units'] <= gateway.ready(), 'call_budget_exceeded')
                 except GatewayUnavailable: raise ModelProblem('provider_configuration_unavailable') from None
             budget = db.scalar(select(ModelBudget).where(ModelBudget.project_id == project_id).with_for_update())
