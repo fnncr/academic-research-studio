@@ -14,7 +14,7 @@ MODEL = 'gpt-4.1-mini-2025-04-14'
 POLICY = 'openai-gpt41mini-2026-11-04-v1'
 ENDPOINT = 'https://api.openai.com/v1/chat/completions'
 CONTEXT = 1047576
-DISCLOSURE = ('OpenAI US/default API endpoint; text context and originals leave this installation. '
+DISCLOSURE = ('OpenAI default API endpoint (account region must be confirmed); text context and originals leave this installation. '
               'store=false; API data not used for training by default. Abuse monitoring may retain '
               'content up to 30 days; caching/contract exceptions apply. No Zero Data Retention promise. '+POLICY)
 
