@@ -1,0 +1,192 @@
+{
+  "case": "fintech",
+  "structural_validity": "passed",
+  "scientific_adequacy": {
+    "status": "requires_expert_review",
+    "checks": [
+      "Сопоставлены выгоды и риски",
+      "Не выдуманы денежные эффекты",
+      "Каждое внешнее утверждение опирается на Evidence",
+      "Нет вымышленных фактов",
+      "Цитаты точны по смыслу и контексту",
+      "Противоречия сохранены"
+    ]
+  },
+  "writing_quality": {
+    "status": "requires_expert_review",
+    "checks": [
+      "Академический стиль",
+      "Сопоставление позиций вместо коллажа",
+      "Полезность для дальнейшего исследования"
+    ]
+  },
+  "execution": "local_mock_only",
+  "model": "mock-grounded-v1",
+  "real_model_quality": "not_measured",
+  "quote": {
+    "input_token_bound": 8565,
+    "output_token_cap": 8000,
+    "max_units": 16565,
+    "currency": "USD",
+    "pricing_version": "mock-microunits-v1"
+  },
+  "proposal": {
+    "schema_version": "1",
+    "context_hash": "03bbc077bfe7245f5e0f959e0cffb18aab3708f9b32ff4c344b04c2e10aaf808",
+    "paragraphs": [
+      "Тезис автора (не подтверждён автоматически): Преимущества технологии следует оценивать вместе с рисками.",
+      "Подтверждающий фрагмент (оригинальный язык: ru).",
+      "В синтетической системе цифровые расчёты уменьшили число ручных операций.",
+      "Противоречащий фрагмент (оригинальный язык: en).",
+      "The synthetic deployment introduced operational outages and privacy risks.",
+      "Ограничивающий фрагмент (оригинальный язык: ru).",
+      "Синтетический пример не содержит оценки затрат или репрезентативной выборки.",
+      "Существуют противоречащие фрагменты: требуется сопоставить методы и границы применимости."
+    ],
+    "claims": [
+      {
+        "claim_id": "788e538e-886c-4d1d-8967-75f151156a66",
+        "status": "needs_review",
+        "evidence": [
+          {
+            "evidence_id": "22b7c1c0-9a9b-463c-8cef-dd7c1ba3dc96",
+            "relation": "supports",
+            "explanation": "Подтверждающий фрагмент: связь сохранена без вывода об истинности."
+          },
+          {
+            "evidence_id": "b3f1fc90-23d5-4700-a067-65982dd1eb4a",
+            "relation": "contradicts",
+            "explanation": "Противоречащий фрагмент: связь сохранена без вывода об истинности."
+          },
+          {
+            "evidence_id": "7b6ffc97-d6e3-477e-a2e9-92ae7e93f50e",
+            "relation": "limits",
+            "explanation": "Ограничивающий фрагмент: связь сохранена без вывода об истинности."
+          }
+        ],
+        "explanation": "Связи не доказывают тезис; требуется оценка контекста, метода и ограничений."
+      }
+    ],
+    "citations": [
+      {
+        "paragraph": 2,
+        "claim_id": "788e538e-886c-4d1d-8967-75f151156a66",
+        "evidence_id": "22b7c1c0-9a9b-463c-8cef-dd7c1ba3dc96",
+        "source_version_id": "f3249baa-3262-4581-b28d-d1eeaede2ec6",
+        "start": 0,
+        "end": 73,
+        "quote": "В синтетической системе цифровые расчёты уменьшили число ручных операций.",
+        "kind": "quotation"
+      },
+      {
+        "paragraph": 4,
+        "claim_id": "788e538e-886c-4d1d-8967-75f151156a66",
+        "evidence_id": "b3f1fc90-23d5-4700-a067-65982dd1eb4a",
+        "source_version_id": "52a23e00-055a-495e-815a-409e1502db22",
+        "start": 0,
+        "end": 74,
+        "quote": "The synthetic deployment introduced operational outages and privacy risks.",
+        "kind": "quotation"
+      },
+      {
+        "paragraph": 6,
+        "claim_id": "788e538e-886c-4d1d-8967-75f151156a66",
+        "evidence_id": "7b6ffc97-d6e3-477e-a2e9-92ae7e93f50e",
+        "source_version_id": "526fee99-9ddc-4139-bd63-a462be3b8554",
+        "start": 0,
+        "end": 76,
+        "quote": "Синтетический пример не содержит оценки затрат или репрезентативной выборки.",
+        "kind": "quotation"
+      }
+    ],
+    "research_gaps": [],
+    "warnings": [
+      "Локальный шаблонный раздел: требуется смысловая проверка автором."
+    ],
+    "verification": "unverified"
+  },
+  "report": {
+    "provenance": {
+      "context_hash": "03bbc077bfe7245f5e0f959e0cffb18aab3708f9b32ff4c344b04c2e10aaf808",
+      "manuscript": "a0baf25f-fece-4b05-8dca-da577fc6b9d9",
+      "plan": "689c1f26-e9ac-414a-83bb-4044fc0740eb",
+      "brief": "d48e253d-7cb3-42d5-9a99-97556f5ca470",
+      "model": "mock-grounded-v1",
+      "provider": "mock",
+      "prompt_hash": "1e5ccdfb6771bbe91b8b382a6f3131d6d04c2812bd46feb8b1ed19b5ea9b0afc",
+      "schema_hash": "00845d8234a5515c054108a7a136f46e2204c85396637bb29e4e4cd078b150a6",
+      "prompt_version": "evidence-sections-v1",
+      "policy_version": "grounded-append-v1",
+      "source_hashes": {
+        "526fee99-9ddc-4139-bd63-a462be3b8554": "1cf9b77d89c14f7c180504edb514b4809f4ea1461e56e174ce7a40e5711720c6",
+        "52a23e00-055a-495e-815a-409e1502db22": "7d25dcf0680aad8da3ad5d2ac40b2a424f91a63e33f25d0bff00e843e3b68ed8",
+        "f3249baa-3262-4581-b28d-d1eeaede2ec6": "843cf545cd56adced654a3c6126cf877146b2ce643c34c97ce82cf28589b2828"
+      },
+      "evidence_hashes": {
+        "22b7c1c0-9a9b-463c-8cef-dd7c1ba3dc96": "9311a8a81fbb93e83cbfe1e5e844360be0d373857c62819c7882b3ae6e9ee23d",
+        "7b6ffc97-d6e3-477e-a2e9-92ae7e93f50e": "91075f2517ef1fea80424c4acf5894fba0ba7881f5d7bf08ba1e6cca42f587f0",
+        "b3f1fc90-23d5-4700-a067-65982dd1eb4a": "b31c44e926b1ab4254eb1d6fc79c7b8867ff13bc5623037c874eee6b89038fc3"
+      }
+    },
+    "evidence_relations": {
+      "788e538e-886c-4d1d-8967-75f151156a66": {
+        "supports": [
+          "22b7c1c0-9a9b-463c-8cef-dd7c1ba3dc96"
+        ],
+        "contradicts": [
+          "b3f1fc90-23d5-4700-a067-65982dd1eb4a"
+        ],
+        "limits": [
+          "7b6ffc97-d6e3-477e-a2e9-92ae7e93f50e"
+        ]
+      }
+    },
+    "bibliography_diagnostics": {
+      "526fee99-9ddc-4139-bd63-a462be3b8554": {
+        "missing_fields": [
+          "authors",
+          "year"
+        ],
+        "locator_status": "unverified",
+        "scientific_verification": "unverified"
+      },
+      "52a23e00-055a-495e-815a-409e1502db22": {
+        "missing_fields": [
+          "authors",
+          "year"
+        ],
+        "locator_status": "unverified",
+        "scientific_verification": "unverified"
+      },
+      "f3249baa-3262-4581-b28d-d1eeaede2ec6": {
+        "missing_fields": [
+          "authors",
+          "year"
+        ],
+        "locator_status": "unverified",
+        "scientific_verification": "unverified"
+      }
+    },
+    "research_gaps": [],
+    "limitations": [
+      "Structural identifiers and matching quotations do not establish entailment or truth."
+    ],
+    "structural": "structurally_valid",
+    "semantic": "uncertain",
+    "scientific_verification": "unverified",
+    "warnings": [
+      "Image pixels are not sent or interpreted; formula text is not evaluated."
+    ],
+    "execution": {
+      "quote": {
+        "currency": "USD",
+        "max_units": 16565,
+        "pricing_version": "mock-microunits-v1",
+        "output_token_cap": 8000,
+        "input_token_bound": 8565
+      },
+      "input_tokens": 50,
+      "output_tokens": 50
+    }
+  }
+}
