@@ -27,6 +27,42 @@ def unique_object(pairs):
         value[key]=item
     return value
 
+def usage_charge(usage, quote):
+    """Accept only the reviewed text billing contract, never infer a receipt.
+
+    Nullable detail objects are documented; absent cached counts are charged at
+    the full input rate. Unknown fields, misplaced counters and inconsistent
+    totals require owner reconciliation and freeze further project spending.
+    """
+    if not isinstance(usage, dict) or set(usage) - {
+        'prompt_tokens', 'completion_tokens', 'total_tokens',
+        'prompt_tokens_details', 'completion_tokens_details',
+    }:
+        raise UnconfirmedBilling()
+    inp, out, total = (usage.get(k) for k in ('prompt_tokens', 'completion_tokens', 'total_tokens'))
+    if any(type(v) is not int or v < 0 for v in (inp, out, total)):
+        raise UnconfirmedBilling()
+    if total != inp + out or inp > quote.input_token_bound or out > quote.output_token_cap:
+        raise UnconfirmedBilling()
+    prompt = usage.get('prompt_tokens_details')
+    completion = usage.get('completion_tokens_details')
+    prompt = {} if prompt is None else prompt
+    completion = {} if completion is None else completion
+    for details, allowed in (
+        (prompt, {'cached_tokens', 'audio_tokens'}),
+        (completion, {'reasoning_tokens', 'audio_tokens', 'accepted_prediction_tokens', 'rejected_prediction_tokens'}),
+    ):
+        if not isinstance(details, dict) or set(details) - allowed:
+            raise UnconfirmedBilling()
+        if any(type(v) is not int or v < 0 for v in details.values()):
+            raise UnconfirmedBilling()
+        if any(v != 0 for k, v in details.items() if k != 'cached_tokens'):
+            raise UnconfirmedBilling()
+    cached = prompt.get('cached_tokens', 0)
+    if cached > inp:
+        raise UnconfirmedBilling()
+    return ((inp-cached)*4 + cached + out*16 + 9)//10, inp, out
+
 def strict_schema(contract):
     schema = deepcopy(contract.model_json_schema())
     def visit(value):
@@ -93,15 +129,7 @@ class OpenAIChat:
                         data.extend(chunk)
             raw=json.loads(data,parse_constant=_reject_constant,object_pairs_hook=unique_object)
             if raw.get('model')!=MODEL or raw.get('service_tier')!='default': raise UnconfirmedBilling()
-            usage=raw['usage']; inp=usage['prompt_tokens']; out=usage['completion_tokens']
-            cached=usage.get('prompt_tokens_details',{}).get('cached_tokens',0)
-            reasoning=usage.get('completion_tokens_details',{}).get('reasoning_tokens',0)
-            if any(type(v)is not int or v<0 for v in (inp,out,cached,reasoning)) or cached>inp: raise UnconfirmedBilling()
-            if inp>quote.input_token_bound or out>spec.max_output_tokens or reasoning: raise UnconfirmedBilling()
-            # No audio/tools/prediction accepted. Unknown billed token categories require investigation.
-            for details in (usage.get('prompt_tokens_details',{}),usage.get('completion_tokens_details',{})):
-                if any(v for k,v in details.items() if k not in {'cached_tokens','reasoning_tokens'}): raise UnconfirmedBilling()
-            charge=((inp-cached)*4+cached+out*16+9)//10
+            charge, inp, out = usage_charge(raw.get('usage'), quote)
             choice=raw['choices'][0]; message=choice['message']; result={}
             if choice.get('finish_reason')=='stop' and not message.get('refusal') and not message.get('tool_calls'):
                 try: result=json.loads(message['content'],parse_constant=_reject_constant,object_pairs_hook=unique_object)
