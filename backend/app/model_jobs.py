@@ -414,3 +414,15 @@ class ModelJobs:
             job = db.scalar(select(ModelJob).where(ModelJob.project_id==project_id, ModelJob.request_id==request_id))
             require(job is not None, 'not_found')
             return self.read(project_id, job.id)
+
+
+    def billing_uncertain(self, project_id, job_id, token, dispatch_id):
+        with Session(self.engine) as db, db.begin():
+            job = self._lock(db, project_id, job_id)
+            require(job.lease_token == token and job.dispatch_id == dispatch_id, 'stale_lease')
+            if job.state in {'dispatching','ambiguous'}:
+                job.state = 'ambiguous'
+                job.report = {'code':'unconfirmed_billing', 'resolution_required':True}
+                budget = db.scalar(select(ModelBudget).where(ModelBudget.project_id == project_id).with_for_update())
+                budget.blocked = True
+            return view(job)

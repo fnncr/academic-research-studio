@@ -7,7 +7,7 @@ from dataclasses import asdict
 
 from app.model_contracts import TaskSpec
 from app.model_context import ModelProblem, require
-from app.model_gateway import configured_gateway, check_ready, gateway_for
+from app.model_gateway import configured_gateway, check_ready, gateway_for, UnconfirmedBilling
 
 log = logging.getLogger(__name__)
 
@@ -51,6 +51,8 @@ def run_once(queue, gateway=None, stop=None):
         try:
             reply = gateway.generate(data['context'], spec, dispatched['dispatch_id'])
             return queue.finish(project, job, token, dispatched['dispatch_id'], reply)
+        except UnconfirmedBilling:
+            return queue.billing_uncertain(project, job, token, dispatched['dispatch_id'])
         except Exception:
             return queue.ambiguous(project, job, token, dispatched['dispatch_id'])
     finally:

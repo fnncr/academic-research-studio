@@ -34,6 +34,10 @@ class AmbiguousOutcome(Exception):
     """Request may have been billed; never silently resend."""
 
 
+class UnconfirmedBilling(AmbiguousOutcome):
+    """A provider billing contract changed; freeze spending pending review."""
+
+
 def messages(packet, spec):
     from app.grounded_writing import PROMPT, prompt_manifest
     require(packet.get('writing_contract') == prompt_manifest(), 'prompt_changed')
