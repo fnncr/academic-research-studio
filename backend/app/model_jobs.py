@@ -220,6 +220,8 @@ class ModelJobs:
                 except (ValueError, ValidationError) as exc:
                     job.state = 'invalid'; job.report = {'code': 'invalid_result', 'semantic': 'uncertain',
                         'validation_code': str(exc) if isinstance(exc, ModelProblem) else 'schema_mismatch'}
+            if reply.billing_details is not None:
+                job.report = {**job.report, 'billing': deepcopy(reply.billing_details)}
             self._settle(db, job, reply.charged_units, 'provider_response', reply.input_tokens, reply.output_tokens)
             return view(job)
 

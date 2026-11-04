@@ -31,3 +31,15 @@ frontend/src/ModelAssistant.tsx. PR #22–23 финансовая защита �
 P7/P8/P9 не начаты. Не утверждать, что вся P6.1 real integration завершена.
 
 Финальный локальный прогон: 332 backend без skips, 53 frontend, build passed.
+
+## Продолжение: Responses adapter под контрактными тестами
+
+Интеграционная ветка integration/p6-1-pr26 / PR #27 переносит PR #26 на main.
+Зависимая feat/p6-1-responses-adapter содержит app/model_adapters/openai_responses.py
+и tests/test_sol_responses.py. Компактная официальная Python reference и кешовые
+usage-счётчики прочитаны; строгие тарифы/границы реализованы.
+Production ready() по-прежнему закрыт, allowlist не расширен. Реальных вызовов 0.
+Перед активацией следовать docs/p6-1-responses-adapter.md, особенно owner/account/
+network/region/data/budget и отдельному review маршрутизации API/worker.
+Не считать старую fallback-формулировку «adapter отсутствует» актуальным статусом
+реализации: adapter теперь существует, но не допущен к исполнению.
