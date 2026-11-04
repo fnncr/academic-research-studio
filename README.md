@@ -140,3 +140,9 @@ full P2–P6/P5.1 checks with no skipped rich-object test, a synthetic DOCX/PDF 
 and fault coverage. [Recovery runbook](docs/p6-recovery-runbook.md) covers unknown
 outcomes, billing freezes, receipt replay and version conflicts. Real paid calls
 remain disabled; live quality/billing and owner acceptance remain outstanding.
+
+[Независимый аудит P6](docs/validation/p6-independent-audit.md) уточняет гарантии,
+научные ограничения и подтверждённое финансовое исправление в PR #23.
+[Live-протокол](docs/validation/p6-live-acceptance.md) остаётся blocked до отдельного
+разрешения владельца. [Готовность к P7](docs/p7-readiness.md) описывает следующие
+формальные проверки; сами P7/P8/P9 ещё не реализуются.
