@@ -1,0 +1,192 @@
+{
+  "case": "economics",
+  "structural_validity": "passed",
+  "scientific_adequacy": {
+    "status": "requires_expert_review",
+    "checks": [
+      "Сопоставлены спрос и издержки",
+      "Нет универсальной причинности",
+      "Каждое внешнее утверждение опирается на Evidence",
+      "Нет вымышленных фактов",
+      "Цитаты точны по смыслу и контексту",
+      "Противоречия сохранены"
+    ]
+  },
+  "writing_quality": {
+    "status": "requires_expert_review",
+    "checks": [
+      "Академический стиль",
+      "Сопоставление позиций вместо коллажа",
+      "Полезность для дальнейшего исследования"
+    ]
+  },
+  "execution": "local_mock_only",
+  "model": "mock-grounded-v1",
+  "real_model_quality": "not_measured",
+  "quote": {
+    "input_token_bound": 8513,
+    "output_token_cap": 8000,
+    "max_units": 16513,
+    "currency": "USD",
+    "pricing_version": "mock-microunits-v1"
+  },
+  "proposal": {
+    "schema_version": "1",
+    "context_hash": "aad43a646ff2acfe1e7f98e197fe7bfc8a9feada8e5b88b96b211aaa4ade0a9a",
+    "paragraphs": [
+      "Тезис автора (не подтверждён автоматически): Изменение цены может иметь несколько объяснений.",
+      "Подтверждающий фрагмент (оригинальный язык: ru).",
+      "В синтетическом случае A цена выросла одновременно со спросом.",
+      "Противоречащий фрагмент (оригинальный язык: en).",
+      "Synthetic case B attributes the price increase to higher costs, with unchanged demand.",
+      "Ограничивающий фрагмент (оригинальный язык: ru).",
+      "Синтетические наблюдения не позволяют отделить причинность от совпадения.",
+      "Существуют противоречащие фрагменты: требуется сопоставить методы и границы применимости."
+    ],
+    "claims": [
+      {
+        "claim_id": "788c8d59-1ed2-411b-8b3b-9a2cf7c13b11",
+        "status": "needs_review",
+        "evidence": [
+          {
+            "evidence_id": "3f4ec125-e7dd-4494-bb02-8de5076f7c91",
+            "relation": "supports",
+            "explanation": "Подтверждающий фрагмент: связь сохранена без вывода об истинности."
+          },
+          {
+            "evidence_id": "58dae305-d207-411a-adad-31c6cbf8ac10",
+            "relation": "contradicts",
+            "explanation": "Противоречащий фрагмент: связь сохранена без вывода об истинности."
+          },
+          {
+            "evidence_id": "962a0fb0-7be8-4e88-8935-d3c9cf60bae1",
+            "relation": "limits",
+            "explanation": "Ограничивающий фрагмент: связь сохранена без вывода об истинности."
+          }
+        ],
+        "explanation": "Связи не доказывают тезис; требуется оценка контекста, метода и ограничений."
+      }
+    ],
+    "citations": [
+      {
+        "paragraph": 2,
+        "claim_id": "788c8d59-1ed2-411b-8b3b-9a2cf7c13b11",
+        "evidence_id": "3f4ec125-e7dd-4494-bb02-8de5076f7c91",
+        "source_version_id": "e14aef84-d74a-4579-b9c2-86b6d19e447d",
+        "start": 0,
+        "end": 62,
+        "quote": "В синтетическом случае A цена выросла одновременно со спросом.",
+        "kind": "quotation"
+      },
+      {
+        "paragraph": 4,
+        "claim_id": "788c8d59-1ed2-411b-8b3b-9a2cf7c13b11",
+        "evidence_id": "58dae305-d207-411a-adad-31c6cbf8ac10",
+        "source_version_id": "476c5a46-9d37-4f0f-a43a-afa99da69ef1",
+        "start": 0,
+        "end": 86,
+        "quote": "Synthetic case B attributes the price increase to higher costs, with unchanged demand.",
+        "kind": "quotation"
+      },
+      {
+        "paragraph": 6,
+        "claim_id": "788c8d59-1ed2-411b-8b3b-9a2cf7c13b11",
+        "evidence_id": "962a0fb0-7be8-4e88-8935-d3c9cf60bae1",
+        "source_version_id": "4ec693c9-3fd9-4d4a-ba14-5af8b671e390",
+        "start": 0,
+        "end": 73,
+        "quote": "Синтетические наблюдения не позволяют отделить причинность от совпадения.",
+        "kind": "quotation"
+      }
+    ],
+    "research_gaps": [],
+    "warnings": [
+      "Локальный шаблонный раздел: требуется смысловая проверка автором."
+    ],
+    "verification": "unverified"
+  },
+  "report": {
+    "provenance": {
+      "context_hash": "aad43a646ff2acfe1e7f98e197fe7bfc8a9feada8e5b88b96b211aaa4ade0a9a",
+      "manuscript": "29c2136e-84ac-4cf2-8577-9ca637f8f708",
+      "plan": "ed1f20a7-ee8e-4b6e-b632-dc055552398a",
+      "brief": "1483b4c3-7700-40c7-b208-2fc4f4fcba9c",
+      "model": "mock-grounded-v1",
+      "provider": "mock",
+      "prompt_hash": "1e5ccdfb6771bbe91b8b382a6f3131d6d04c2812bd46feb8b1ed19b5ea9b0afc",
+      "schema_hash": "00845d8234a5515c054108a7a136f46e2204c85396637bb29e4e4cd078b150a6",
+      "prompt_version": "evidence-sections-v1",
+      "policy_version": "grounded-append-v1",
+      "source_hashes": {
+        "476c5a46-9d37-4f0f-a43a-afa99da69ef1": "8eddab6102831bceaa758803b933ab9fab9ae21179bc795c9fc69b8620f995df",
+        "4ec693c9-3fd9-4d4a-ba14-5af8b671e390": "b924a8a02913a56e42afe7c5d9e9d39a0f4ae0d9f046b9a03f185983509de6bf",
+        "e14aef84-d74a-4579-b9c2-86b6d19e447d": "052021d3fd21f9097bc7a4d872721e546e94d72e8d39788a0546cc829693b1bc"
+      },
+      "evidence_hashes": {
+        "3f4ec125-e7dd-4494-bb02-8de5076f7c91": "4b152ab18cbc1384d34d24b7bc8b7ef768f9e3df844911ddc815535681b542aa",
+        "58dae305-d207-411a-adad-31c6cbf8ac10": "bef478a45bfd853f153c50098294eb5e81c6f91bbb3c1bcf4a2999e9fc10f6aa",
+        "962a0fb0-7be8-4e88-8935-d3c9cf60bae1": "6373ea1579443ee6b5850ccccdaf0a9ca145742b7b9865e1dc14b721a372186c"
+      }
+    },
+    "evidence_relations": {
+      "788c8d59-1ed2-411b-8b3b-9a2cf7c13b11": {
+        "supports": [
+          "3f4ec125-e7dd-4494-bb02-8de5076f7c91"
+        ],
+        "contradicts": [
+          "58dae305-d207-411a-adad-31c6cbf8ac10"
+        ],
+        "limits": [
+          "962a0fb0-7be8-4e88-8935-d3c9cf60bae1"
+        ]
+      }
+    },
+    "bibliography_diagnostics": {
+      "476c5a46-9d37-4f0f-a43a-afa99da69ef1": {
+        "missing_fields": [
+          "authors",
+          "year"
+        ],
+        "locator_status": "unverified",
+        "scientific_verification": "unverified"
+      },
+      "4ec693c9-3fd9-4d4a-ba14-5af8b671e390": {
+        "missing_fields": [
+          "authors",
+          "year"
+        ],
+        "locator_status": "unverified",
+        "scientific_verification": "unverified"
+      },
+      "e14aef84-d74a-4579-b9c2-86b6d19e447d": {
+        "missing_fields": [
+          "authors",
+          "year"
+        ],
+        "locator_status": "unverified",
+        "scientific_verification": "unverified"
+      }
+    },
+    "research_gaps": [],
+    "limitations": [
+      "Structural identifiers and matching quotations do not establish entailment or truth."
+    ],
+    "structural": "structurally_valid",
+    "semantic": "uncertain",
+    "scientific_verification": "unverified",
+    "warnings": [
+      "Image pixels are not sent or interpreted; formula text is not evaluated."
+    ],
+    "execution": {
+      "quote": {
+        "currency": "USD",
+        "max_units": 16513,
+        "pricing_version": "mock-microunits-v1",
+        "output_token_cap": 8000,
+        "input_token_bound": 8513
+      },
+      "input_tokens": 50,
+      "output_tokens": 50
+    }
+  }
+}

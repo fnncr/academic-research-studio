@@ -1,0 +1,18 @@
+{
+  "browser": "154.0.8037.57",
+  "mock_only": true,
+  "request_uuid_restored": "77576b90-7ff9-4cb0-b532-f7a69af3eeee",
+  "browser_enqueues": 1,
+  "semantic_review": "uncertain",
+  "review_creation": "API only; UI control absent",
+  "manuscript_before": "d84ac2d5-1249-4881-b8fd-3431de3cbe27",
+  "manuscript_after": "40c93d61-116a-4a82-a79b-3652aa53083b",
+  "original_blocks_preserved": true,
+  "docx_downloaded": true,
+  "restored_as_new_revision": "9276a59d-072e-41a5-9a03-11dc45974e94",
+  "accepted_archive_unchanged": true,
+  "old_citations_not_rebased": true,
+  "mobile_assistant_overflow": false,
+  "page_errors": [],
+  "external_browser_requests": []
+}

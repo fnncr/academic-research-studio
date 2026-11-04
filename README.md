@@ -146,3 +146,12 @@ remain disabled; live quality/billing and owner acceptance remain outstanding.
 [Live-протокол](docs/validation/p6-live-acceptance.md) остаётся blocked до отдельного
 разрешения владельца. [Готовность к P7](docs/p7-readiness.md) описывает следующие
 формальные проверки; сами P7/P8/P9 ещё не реализуются.
+
+[P6.1: совместимость Sol](docs/p6-1-model-compatibility.md) показывает
+документированную, но заблокированную модель. [Проверки и подготовка](docs/p6-1-validation.md)
+включают три научных evaluation-сценария и локальный live-preparation CLI.
+Реальный Sol adapter пока отсутствует; mock/manual доступны без ключа.
+
+[Staged Responses adapter](docs/p6-1-responses-adapter.md) добавляет контрактные
+проверки Sol usage/reasoning/cache/long-context pricing. Production-выполнение
+остаётся заблокированным до отдельной активации и разрешения владельца.

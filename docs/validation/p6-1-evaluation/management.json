@@ -1,0 +1,192 @@
+{
+  "case": "management",
+  "structural_validity": "passed",
+  "scientific_adequacy": {
+    "status": "requires_expert_review",
+    "checks": [
+      "Сравнены оба подхода",
+      "Названы условия применимости",
+      "Каждое внешнее утверждение опирается на Evidence",
+      "Нет вымышленных фактов",
+      "Цитаты точны по смыслу и контексту",
+      "Противоречия сохранены"
+    ]
+  },
+  "writing_quality": {
+    "status": "requires_expert_review",
+    "checks": [
+      "Академический стиль",
+      "Сопоставление позиций вместо коллажа",
+      "Полезность для дальнейшего исследования"
+    ]
+  },
+  "execution": "local_mock_only",
+  "model": "mock-grounded-v1",
+  "real_model_quality": "not_measured",
+  "quote": {
+    "input_token_bound": 8599,
+    "output_token_cap": 8000,
+    "max_units": 16599,
+    "currency": "USD",
+    "pricing_version": "mock-microunits-v1"
+  },
+  "proposal": {
+    "schema_version": "1",
+    "context_hash": "c461ef5f7acf8906238f646e7a7b5c9e8ac06583522c30d5d5c8f74a80884a5f",
+    "paragraphs": [
+      "Тезис автора (не подтверждён автоматически): Пригодность управления зависит от условий организации.",
+      "Подтверждающий фрагмент (оригинальный язык: ru).",
+      "В синтетическом случае централизованное решение улучшило согласование действий.",
+      "Противоречащий фрагмент (оригинальный язык: en).",
+      "In a synthetic comparison, team autonomy supported adaptation; central approval delayed decisions.",
+      "Ограничивающий фрагмент (оригинальный язык: ru).",
+      "Синтетические организации различаются по размеру; перенос вывода не обоснован.",
+      "Существуют противоречащие фрагменты: требуется сопоставить методы и границы применимости."
+    ],
+    "claims": [
+      {
+        "claim_id": "4afa6d6e-f743-4b1f-b01f-3d82e3f8d68f",
+        "status": "needs_review",
+        "evidence": [
+          {
+            "evidence_id": "1035995d-6520-44ae-9703-7c2837fffe92",
+            "relation": "supports",
+            "explanation": "Подтверждающий фрагмент: связь сохранена без вывода об истинности."
+          },
+          {
+            "evidence_id": "b136bc09-ee17-4338-91d3-fdda7b77f5eb",
+            "relation": "contradicts",
+            "explanation": "Противоречащий фрагмент: связь сохранена без вывода об истинности."
+          },
+          {
+            "evidence_id": "8ed51c86-a654-4d3c-8b1d-e3fe8e2406f4",
+            "relation": "limits",
+            "explanation": "Ограничивающий фрагмент: связь сохранена без вывода об истинности."
+          }
+        ],
+        "explanation": "Связи не доказывают тезис; требуется оценка контекста, метода и ограничений."
+      }
+    ],
+    "citations": [
+      {
+        "paragraph": 2,
+        "claim_id": "4afa6d6e-f743-4b1f-b01f-3d82e3f8d68f",
+        "evidence_id": "1035995d-6520-44ae-9703-7c2837fffe92",
+        "source_version_id": "e7370623-7d28-4994-a6fd-24ba40872ed4",
+        "start": 0,
+        "end": 79,
+        "quote": "В синтетическом случае централизованное решение улучшило согласование действий.",
+        "kind": "quotation"
+      },
+      {
+        "paragraph": 4,
+        "claim_id": "4afa6d6e-f743-4b1f-b01f-3d82e3f8d68f",
+        "evidence_id": "b136bc09-ee17-4338-91d3-fdda7b77f5eb",
+        "source_version_id": "69b87cd8-1bef-4658-a5e0-1f7758ad4177",
+        "start": 0,
+        "end": 98,
+        "quote": "In a synthetic comparison, team autonomy supported adaptation; central approval delayed decisions.",
+        "kind": "quotation"
+      },
+      {
+        "paragraph": 6,
+        "claim_id": "4afa6d6e-f743-4b1f-b01f-3d82e3f8d68f",
+        "evidence_id": "8ed51c86-a654-4d3c-8b1d-e3fe8e2406f4",
+        "source_version_id": "95bffd0a-8df2-47ba-af6c-e6b02dea0dae",
+        "start": 0,
+        "end": 78,
+        "quote": "Синтетические организации различаются по размеру; перенос вывода не обоснован.",
+        "kind": "quotation"
+      }
+    ],
+    "research_gaps": [],
+    "warnings": [
+      "Локальный шаблонный раздел: требуется смысловая проверка автором."
+    ],
+    "verification": "unverified"
+  },
+  "report": {
+    "provenance": {
+      "context_hash": "c461ef5f7acf8906238f646e7a7b5c9e8ac06583522c30d5d5c8f74a80884a5f",
+      "manuscript": "01d3425f-93e6-476e-a905-13f661ca08e7",
+      "plan": "b980f919-e05b-4b76-8ad8-dcbf64c186f2",
+      "brief": "2fedd9ba-e464-4076-b21f-8c5676f57495",
+      "model": "mock-grounded-v1",
+      "provider": "mock",
+      "prompt_hash": "1e5ccdfb6771bbe91b8b382a6f3131d6d04c2812bd46feb8b1ed19b5ea9b0afc",
+      "schema_hash": "00845d8234a5515c054108a7a136f46e2204c85396637bb29e4e4cd078b150a6",
+      "prompt_version": "evidence-sections-v1",
+      "policy_version": "grounded-append-v1",
+      "source_hashes": {
+        "69b87cd8-1bef-4658-a5e0-1f7758ad4177": "2796e71d563f54e02acd2fe1b325fe68279b0127ae146f4790ad2bbba9a38065",
+        "95bffd0a-8df2-47ba-af6c-e6b02dea0dae": "b76251c57f34cd6b0b8c8108b951061b123e3e69cecad3eca5f49662c5fb62c9",
+        "e7370623-7d28-4994-a6fd-24ba40872ed4": "07a1695269637472ef0d0b6f51501dddb6180a74a7943f335f9b6c348ec0c264"
+      },
+      "evidence_hashes": {
+        "1035995d-6520-44ae-9703-7c2837fffe92": "87987e173f44309d2c55e4ff9cd5b7c9462d337b9f92cd592347603df3b85d45",
+        "8ed51c86-a654-4d3c-8b1d-e3fe8e2406f4": "556cc241a25c47ac7029b1bbcb8468a18ba9fa0409d344a5fdfd3983c1288043",
+        "b136bc09-ee17-4338-91d3-fdda7b77f5eb": "b1f969815575918422c0ed546cd6fdc5e18d75dd697b1a1b6134513bd570f6c7"
+      }
+    },
+    "evidence_relations": {
+      "4afa6d6e-f743-4b1f-b01f-3d82e3f8d68f": {
+        "supports": [
+          "1035995d-6520-44ae-9703-7c2837fffe92"
+        ],
+        "contradicts": [
+          "b136bc09-ee17-4338-91d3-fdda7b77f5eb"
+        ],
+        "limits": [
+          "8ed51c86-a654-4d3c-8b1d-e3fe8e2406f4"
+        ]
+      }
+    },
+    "bibliography_diagnostics": {
+      "69b87cd8-1bef-4658-a5e0-1f7758ad4177": {
+        "missing_fields": [
+          "authors",
+          "year"
+        ],
+        "locator_status": "unverified",
+        "scientific_verification": "unverified"
+      },
+      "95bffd0a-8df2-47ba-af6c-e6b02dea0dae": {
+        "missing_fields": [
+          "authors",
+          "year"
+        ],
+        "locator_status": "unverified",
+        "scientific_verification": "unverified"
+      },
+      "e7370623-7d28-4994-a6fd-24ba40872ed4": {
+        "missing_fields": [
+          "authors",
+          "year"
+        ],
+        "locator_status": "unverified",
+        "scientific_verification": "unverified"
+      }
+    },
+    "research_gaps": [],
+    "limitations": [
+      "Structural identifiers and matching quotations do not establish entailment or truth."
+    ],
+    "structural": "structurally_valid",
+    "semantic": "uncertain",
+    "scientific_verification": "unverified",
+    "warnings": [
+      "Image pixels are not sent or interpreted; formula text is not evaluated."
+    ],
+    "execution": {
+      "quote": {
+        "currency": "USD",
+        "max_units": 16599,
+        "pricing_version": "mock-microunits-v1",
+        "output_token_cap": 8000,
+        "input_token_bound": 8599
+      },
+      "input_tokens": 50,
+      "output_tokens": 50
+    }
+  }
+}

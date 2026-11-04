@@ -23,6 +23,7 @@ class GatewayReply:
     charged_units: int
     input_tokens: int
     output_tokens: int
+    billing_details: dict | None = None
 
 
 class Gateway(Protocol):
