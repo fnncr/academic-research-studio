@@ -181,7 +181,8 @@ class ModelJobs:
         require(type(units) is int and 0 <= units <= job.reserved_units, 'invalid_charge')
         require((input_tokens is None and output_tokens is None) or
                 (type(input_tokens) is int and type(output_tokens) is int and
-                 0 <= input_tokens <= 1000000 and 0 <= output_tokens <= 1000000), 'invalid_usage')
+                 0 <= input_tokens <= job.input_json['quote']['input_token_bound'] and
+                 0 <= output_tokens <= job.input_json['quote']['output_token_cap']), 'invalid_usage')
         require(db.get(ModelSettlement, job.id) is None, 'already_settled')
         budget = db.scalar(select(ModelBudget).where(ModelBudget.project_id == job.project_id).with_for_update())
         budget.reserved_units -= job.reserved_units; budget.spent_units += units

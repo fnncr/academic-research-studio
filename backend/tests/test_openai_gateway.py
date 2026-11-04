@@ -24,7 +24,7 @@ def approved(monkeypatch):
 def external(s): return s.model_copy(update={'provider':'openai','model':MODEL})
 
 def api_reply(result):
-    return {'model':MODEL,'service_tier':'default','usage':{'prompt_tokens':100,'completion_tokens':50,'prompt_tokens_details':{'cached_tokens':20}},
+    return {'model':MODEL,'service_tier':'default','usage':{'prompt_tokens':100,'completion_tokens':50,'total_tokens':150,'prompt_tokens_details':{'cached_tokens':20}},
             'choices':[{'finish_reason':'stop','message':{'content':json.dumps(result)}}]}
 
 def test_schema_required_and_no_extra():
