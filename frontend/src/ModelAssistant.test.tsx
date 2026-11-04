@@ -43,3 +43,12 @@ it('reuses acceptance UUID after a lost response and restores the immutable rece
  vi.stubGlobal('crypto',{randomUUID:()=>`uuid-${Math.random()}`,subtle:{digest:async()=>new Uint8Array(32).buffer}});const s=server();persist('x',{jobId:'j1'});s.setJob({id:'j1',task,state:'succeeded',result:{paragraphs:['Accepted proposal']},cancel_requested:false});s.loseAccept();
  render(<ModelAssistant projectId="x" unsaved={false} onBusy={busy} onAccepted={accepted}/>);const user=await connect();await screen.findByText('Accepted proposal');await user.click(screen.getByLabelText(/Я проверил текст/));await user.click(screen.getByRole('button',{name:'Принять текст новой версией'}));await screen.findByRole('alert');const first=restore('x').accept?.request_id;expect(first).toBeTruthy();await user.click(screen.getByRole('button',{name:'Принять текст новой версией'}));await screen.findByText(/Текст принят новой версией/);const calls=s.mutations.filter(m=>m.url.endsWith('/accept'));expect(calls).toHaveLength(2);expect(calls[0].body).toEqual(calls[1].body);expect(calls[0].body.request_id).toBe(first);
 });
+
+it('offers disabled real provider transparently and retains request-specific consent',async()=>{
+ const s=server();const original=s.fetch.getMockImplementation()!;
+ s.fetch.mockImplementation(async(url:string,options?:RequestInit)=>url.endsWith('/capabilities')?{ok:true,status:200,json:async()=>({provider:'mock',external_enabled:false,providers:[{id:'mock',model:'mock-grounded-v1',ready:true},{id:'openai',model:'gpt-4.1-mini-2025-04-14',ready:false,disclosure:'External retention policy'}]})}:original(url,options));
+ render(<ModelAssistant projectId="x" unsaved={false} onBusy={busy} onAccepted={accepted}/>);const user=await connect();
+ await user.selectOptions(screen.getByLabelText('Провайдер и модель'),'openai');
+ expect(screen.getByText(/Реальная LLM OpenAI/)).toBeVisible();expect(screen.getByText(/External retention policy/)).toBeVisible();
+ expect(s.mutations).toHaveLength(0);expect(screen.queryByRole('button',{name:'Создать задание'})).not.toBeInTheDocument();
+});

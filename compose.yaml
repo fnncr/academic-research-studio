@@ -22,11 +22,15 @@ services:
     environment:
       DATABASE_URL: postgresql+psycopg://studio:${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD}@db:5432/studio
       MODEL_PROVIDER: mock
+      ARS_OPENAI_API_KEY: ${ARS_OPENAI_API_KEY:-}
+      ARS_OPENAI_APPROVAL: ${ARS_OPENAI_APPROVAL:-}
+      ARS_OPENAI_PRICE_CONFIRMED: ${ARS_OPENAI_PRICE_CONFIRMED:-}
+      ARS_OPENAI_MAX_UNITS: ${ARS_OPENAI_MAX_UNITS:-0}
     depends_on:
       db:
         condition: service_healthy
     restart: unless-stopped
-    stop_grace_period: 30s
+    stop_grace_period: 180s
     read_only: true
     tmpfs: [/tmp]
 volumes:

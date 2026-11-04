@@ -7,14 +7,15 @@ from dataclasses import asdict
 
 from app.model_contracts import TaskSpec
 from app.model_context import ModelProblem, require
-from app.model_gateway import configured_gateway, check_ready
+from app.model_gateway import configured_gateway, check_ready, gateway_for
 
 log = logging.getLogger(__name__)
 
 
 def run_once(queue, gateway=None, stop=None):
-    gateway = gateway or configured_gateway()
-    check_ready(gateway)  # Fail before claiming work if runtime configuration is invalid.
+    supplied = gateway
+    if gateway is not None: check_ready(gateway)
+    # Fail before claiming work if runtime configuration is invalid.
     if stop is not None and stop.is_set(): return None
     claim = queue.claim()
     if claim is None: return None
@@ -32,7 +33,10 @@ def run_once(queue, gateway=None, stop=None):
         try:
             data = queue.worker_input(project, job, token)
             spec = TaskSpec.model_validate(data['task'])
+            gateway = supplied or gateway_for(spec.provider)
+            check_ready(gateway)
             require(asdict(gateway.quote(data['context'], spec)) == data['quote'], 'pricing_changed')
+            if spec.provider == 'openai': require(data['quote']['max_units'] <= gateway.ready(), 'call_budget_exceeded')
             check_ready(gateway)
         except Exception:
             return queue.predispatch_failure(project, job, token)
@@ -54,8 +58,7 @@ def run_once(queue, gateway=None, stop=None):
 
 
 def serve(queue, stop, gateway=None):
-    gateway = gateway or configured_gateway()
-    check_ready(gateway)
+    if gateway is not None: check_ready(gateway)
     delay = 1
     while not stop.is_set():
         try:
@@ -77,9 +80,8 @@ def main():
     for name in (signal.SIGINT, signal.SIGTERM): signal.signal(name, lambda *_: stop.set())
     engine = None
     try:
-        gateway = configured_gateway()
         engine = project_engine(os.environ['DATABASE_URL'])
-        serve(ModelJobs(engine), stop, gateway)
+        serve(ModelJobs(engine), stop)
     except Exception:
         log.error('model_worker_startup_failed')
         return 1

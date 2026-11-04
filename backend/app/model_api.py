@@ -107,7 +107,12 @@ def public(job, result=False):
 @router.get('/capabilities')
 async def capabilities(project_id: UUID, request: Request):
     await call(request, 'budget', project_id)
-    return {'provider': 'mock', 'model': 'mock-grounded-v1', 'external_enabled': False,
+    from app.model_adapters.openai_chat import OpenAIChat, MODEL, DISCLOSURE
+    try:
+        OpenAIChat().ready(); ready=True
+    except ValueError: ready=False
+    return {'providers': [{'id':'mock','model':'mock-grounded-v1','ready':True},
+            {'id':'openai','model':MODEL,'ready':ready,'disclosure':DISCLOSURE}], 'provider': 'mock', 'model': 'mock-grounded-v1', 'external_enabled': ready,
             'retention': 'local database only', 'currency': 'USD',
             'token_bound': 'UTF-8 bytes plus framing allowance',
             'paid_retries': False, 'requires_api_key': False}

@@ -70,6 +70,13 @@ def assemble_context(db, project_id, spec):
               'omissions': ['Image pixels are not sent or interpreted; formula text is not evaluated.']}
     from app.grounded_writing import prompt_manifest
     packet['writing_contract'] = prompt_manifest()
+    if spec.provider == 'openai' and spec.section_id is not None:
+        blocks=manuscript.document['blocks']; start=next((i for i,b in enumerate(blocks) if b['id']==str(spec.section_id) and b['type']=='heading'),None)
+        require(start is not None, 'invalid_section')
+        end=next((i for i in range(start+1,len(blocks)) if blocks[i]['type']=='heading' and blocks[i]['level']<=blocks[start]['level']),len(blocks))
+        packet['manuscript']['texts']={k:v['text'] for k,v in text_nodes({'blocks':blocks[start:end]}).items()}
+        packet['manuscript']['block_types']=[b['type'] for b in blocks[start:end]]
+        packet['manuscript']['selected_section_id']=str(spec.section_id)
     if spec.kind == 'semantic_review':
         subject = db.scalar(select(ModelJob).where(ModelJob.project_id == project_id, ModelJob.id == spec.review_job_id))
         require(subject is not None, 'not_found')

@@ -33,10 +33,11 @@ class TaskSpec(Contract):
     manuscript_revision_id: UUID
     plan_revision_id: UUID
     claim_ids: list[UUID] = Field(min_length=1, max_length=20)
+    section_id: UUID | None = None
     title: Short
     instruction: Text
-    provider: Literal['mock'] = 'mock'
-    model: Literal['mock-grounded-v1'] = 'mock-grounded-v1'
+    provider: Literal['mock', 'openai'] = 'mock'
+    model: Literal['mock-grounded-v1', 'gpt-4.1-mini-2025-04-14'] = 'mock-grounded-v1'
     kind: Literal['writing', 'semantic_review'] = 'writing'
     review_job_id: UUID | None = None
     review_result_hash: Hash | None = None
@@ -44,6 +45,7 @@ class TaskSpec(Contract):
 
     @model_validator(mode='after')
     def distinct_claims(self):
+        if (self.provider == 'mock') != (self.model == 'mock-grounded-v1'): raise ValueError('Provider/model mismatch')
         if self.kind == 'semantic_review':
             if self.review_job_id is None or self.review_result_hash is None: raise ValueError('Review subject required')
         elif self.review_job_id is not None or self.review_result_hash is not None:
