@@ -13,9 +13,13 @@ async function api<T>(path: string, options?: RequestInit): Promise<T> {
   return data;
 }
 
+function DiffImage({document,id}:{document:ManuscriptDocument;id:string}) {
+ const block=document.blocks.find(b=>b.id===id); return block?.type==='image' && block.png_base64 ? <img style={{maxWidth:'100%',maxHeight:200}} src={'data:image/png;base64,'+block.png_base64} alt={block.alt}/> : null;
+}
+
 export function ManuscriptDiff({ before, after }: { before: ManuscriptDocument; after: ManuscriptDocument }) {
   const changes = diffDocuments(before, after);
-  return <div className="manuscript-diff">{changes.length === 0 ? <p>Изменений нет.</p> : changes.map(change => <section key={change.id}><h4>{change.label}</h4><div className="diff-columns"><div><strong>Было</strong><pre>{change.before || '—'}</pre></div><div><strong>Стало</strong><pre>{change.after || '—'}</pre></div></div></section>)}</div>;
+  return <div className="manuscript-diff">{changes.length === 0 ? <p>Изменений нет.</p> : changes.map(change => <section key={change.id}><h4>{change.label}</h4><div className="diff-columns"><div><strong>Было</strong><pre>{change.before || '—'}</pre><DiffImage document={before} id={change.id}/></div><div><strong>Стало</strong><pre>{change.after || '—'}</pre><DiffImage document={after} id={change.id}/></div></div></section>)}</div>;
 }
 
 export default function Manuscript({ projectId, onDirty }: { projectId: string; onDirty: (dirty: boolean) => void }) {
@@ -69,7 +73,7 @@ export default function Manuscript({ projectId, onDirty }: { projectId: string; 
     finally { setBusy(false); }
   }
   function edit(next: ManuscriptDocument) {
-    setUndo(previous => [...previous.slice(-29), draft]); setRedo([]); setDraft(next.blocks.some(b => b.type === 'formula') ? { ...next, schema_version: '2' } : next); setRestoredFrom(null); setStatus('');
+    setUndo(previous => [...previous.slice(-29), draft]); setRedo([]); setDraft(next.blocks.some(b => ['formula', 'footnote', 'merged_table', 'image'].includes(b.type)) ? { ...next, schema_version: '2' } : next); setRestoredFrom(null); setStatus('');
   }
   function replace(block: Block) { edit({ ...draft, blocks: draft.blocks.map(old => old.id === block.id ? block : old) }); }
   function move(index: number, direction: number) {
@@ -124,7 +128,7 @@ export default function Manuscript({ projectId, onDirty }: { projectId: string; 
       <div className="editor-actions" aria-label="Добавить блок">{(Object.keys(labels) as Block['type'][]).map(type => <button type="button" key={type} disabled={draft.blocks.length >= 1000} onClick={() => edit({ ...draft, blocks: [...draft.blocks, newBlock(type)] })}>Добавить: {labels[type]}</button>)}</div>
       {!draft.blocks.length && <p>Добавьте заголовки для плана и абзацы для текста.</p>}
       {draft.blocks.map((block, index) => <section key={block.id} id={`block-${block.id}`} className="editor-block" aria-label={`Блок ${index + 1}: ${labels[block.type]}`}><h3>{index + 1}. {labels[block.type]}</h3>
-        <ManuscriptBlock block={block} index={index + 1} change={replace} /><div className="editor-actions"><button type="button" disabled={index === 0} onClick={() => move(index, -1)}>Выше</button><button type="button" disabled={index === draft.blocks.length - 1} onClick={() => move(index, 1)}>Ниже</button><button type="button" onClick={() => edit({ ...draft, blocks: draft.blocks.filter(b => b.id !== block.id) })}>Удалить блок</button></div></section>)}
+        <ManuscriptBlock document={draft} block={block} index={index + 1} change={replace} /><div className="editor-actions"><button type="button" disabled={index === 0} onClick={() => move(index, -1)}>Выше</button><button type="button" disabled={index === draft.blocks.length - 1} onClick={() => move(index, 1)}>Ниже</button><button type="button" onClick={() => edit({ ...draft, blocks: draft.blocks.filter(b => b.id !== block.id) })}>Удалить блок</button></div></section>)}
       <details><summary>Добавить текст из DOCX/PDF</summary><p>{importWarning}</p><label>Файл для добавления в рукопись<input type="file" accept=".docx,.pdf" onChange={importFile} /></label></details>
     </fieldset>{hasImports && <p role="note">{importWarning}</p>}
     {showDiff && <section><h3>Изменения относительно сохранённой версии</h3><ManuscriptDiff before={base?.document ?? emptyDocument()} after={draft} /></section>}

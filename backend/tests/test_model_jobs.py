@@ -334,11 +334,7 @@ def test_v2_formula_survives_append_and_export(setup):
     assert xml(first.content).xpath('//*[local-name()="oMath"]')
 
 
-# This test activates unchanged when independent rich-object PRs #12–14 land.
-import app.manuscript_schema as manuscript_schema
-
-
-@pytest.mark.skipif(not hasattr(manuscript_schema,'Image'), reason='Requires independent P5.1 PRs #12–14')
+# P5.1 is required: a missing rich-object implementation must fail, not skip.
 def test_all_rich_objects_citations_survive_model_acceptance(setup):
     from test_rich_objects import png, node, part
     from test_exports import download

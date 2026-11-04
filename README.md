@@ -131,3 +131,6 @@ adapter with strict structured output, conservative reservations and separate
 application credentials. Review the snapshot's deprecation, pricing/data policy
 and explicit owner activation steps before enabling. Regular tests make no paid
 requests; mock/manual mode stays available. P6 is not declared complete.
+## Изображения, формулы, сноски и объединённые ячейки
+
+[Расширение P2/P5](docs/rich-objects.md) добавляет схему v2, сохраняя чтение/восстановление v1, историю UUID и точные P4-привязки. Четыре последовательных PR следует рассматривать и объединять по порядку. Не поддержаны JPEG/SVG, LaTeX и сложные двумерные формулы. Новых зависимостей и миграций нет.
