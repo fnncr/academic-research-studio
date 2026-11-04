@@ -175,6 +175,7 @@ def generate_docx(document, plan, evidence, sources, request, report):
     if profile.toc:
         doc.add_paragraph('Оглавление', style='Title')
         p = doc.add_paragraph(); p.paragraph_format.first_line_indent = Cm(0)
+        p.alignment = WD_ALIGN_PARAGRAPH.LEFT
         headings = '\n'.join(b['text'] for b in document['blocks'] if b['type'] == 'heading')
         field(p, ' TOC \\o "1-6" \\h \\z \\u ', headings or 'Обновите поле оглавления в Word.')
         doc.add_page_break()

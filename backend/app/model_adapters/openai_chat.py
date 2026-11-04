@@ -5,7 +5,7 @@ import time
 from datetime import datetime, timezone, date
 from copy import deepcopy
 import httpx
-from app.model_gateway import Quote, GatewayReply, GatewayUnavailable, AmbiguousOutcome, messages, _reject_constant
+from app.model_gateway import Quote, GatewayReply, GatewayUnavailable, AmbiguousOutcome, UnconfirmedBilling, messages, _reject_constant
 from app.model_contracts import Proposal, SemanticReview
 from app.model_context import require
 from app.manuscripts import digest
@@ -92,15 +92,15 @@ class OpenAIChat:
                         if len(data)+len(chunk)>1024*1024: raise AmbiguousOutcome()
                         data.extend(chunk)
             raw=json.loads(data,parse_constant=_reject_constant,object_pairs_hook=unique_object)
-            require(raw['model']==MODEL and raw.get('service_tier')=='default', 'unexpected_model_or_tier')
+            if raw.get('model')!=MODEL or raw.get('service_tier')!='default': raise UnconfirmedBilling()
             usage=raw['usage']; inp=usage['prompt_tokens']; out=usage['completion_tokens']
             cached=usage.get('prompt_tokens_details',{}).get('cached_tokens',0)
             reasoning=usage.get('completion_tokens_details',{}).get('reasoning_tokens',0)
-            if any(type(v)is not int or v<0 for v in (inp,out,cached,reasoning)) or cached>inp: raise AmbiguousOutcome()
-            if inp>quote.input_token_bound or out>spec.max_output_tokens or reasoning: raise AmbiguousOutcome()
+            if any(type(v)is not int or v<0 for v in (inp,out,cached,reasoning)) or cached>inp: raise UnconfirmedBilling()
+            if inp>quote.input_token_bound or out>spec.max_output_tokens or reasoning: raise UnconfirmedBilling()
             # No audio/tools/prediction accepted. Unknown billed token categories require investigation.
             for details in (usage.get('prompt_tokens_details',{}),usage.get('completion_tokens_details',{})):
-                if any(v for k,v in details.items() if k not in {'cached_tokens','reasoning_tokens'}): raise AmbiguousOutcome()
+                if any(v for k,v in details.items() if k not in {'cached_tokens','reasoning_tokens'}): raise UnconfirmedBilling()
             charge=((inp-cached)*4+cached+out*16+9)//10
             choice=raw['choices'][0]; message=choice['message']; result={}
             if choice.get('finish_reason')=='stop' and not message.get('refusal') and not message.get('tool_calls'):

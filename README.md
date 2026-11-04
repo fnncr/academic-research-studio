@@ -134,3 +134,9 @@ requests; mock/manual mode stays available. P6 is not declared complete.
 ## Изображения, формулы, сноски и объединённые ячейки
 
 [Расширение P2/P5](docs/rich-objects.md) добавляет схему v2, сохраняя чтение/восстановление v1, историю UUID и точные P4-привязки. Четыре последовательных PR следует рассматривать и объединять по порядку. Не поддержаны JPEG/SVG, LaTeX и сложные двумерные формулы. Новых зависимостей и миграций нет.
+
+[P6 offline integration report](docs/validation/p6-final-integration.md) records
+full P2–P6/P5.1 checks with no skipped rich-object test, a synthetic DOCX/PDF sample
+and fault coverage. [Recovery runbook](docs/p6-recovery-runbook.md) covers unknown
+outcomes, billing freezes, receipt replay and version conflicts. Real paid calls
+remain disabled; live quality/billing and owner acceptance remain outstanding.

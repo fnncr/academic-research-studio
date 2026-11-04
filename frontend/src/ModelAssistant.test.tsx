@@ -52,3 +52,10 @@ it('offers disabled real provider transparently and retains request-specific con
  expect(screen.getByText(/Реальная LLM OpenAI/)).toBeVisible();expect(screen.getByText(/External retention policy/)).toBeVisible();
  expect(s.mutations).toHaveLength(0);expect(screen.queryByRole('button',{name:'Создать задание'})).not.toBeInTheDocument();
 });
+
+
+it('explains billing drift without resending the task',async()=>{
+ const s=server();persist('x',{jobId:'j1'});s.setJob({id:'j1',task,state:'ambiguous',cancel_requested:false,report:{code:'unconfirmed_billing'}});
+ render(<ModelAssistant projectId="x" unsaved={false} onBusy={busy} onAccepted={accepted}/>);await connect();
+ expect(await screen.findByText(/Тарификация ответа провайдера не подтверждена/)).toBeVisible();expect(s.mutations).toHaveLength(0);
+});
