@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 type Finding = { criterion_id: string; block_id: string; start: number; quote: string; explanation: string };
 type Coverage = { criterion_id: string; title: string; status: string };
@@ -10,6 +10,7 @@ export default function EditorialReview({ projectId, revisionId, unsaved }:
   const [report, setReport] = useState<Report | null>(null);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  useEffect(() => { setReport(null); setError(''); }, [projectId, revisionId]);
   async function run() {
     setReport(null); setError(''); setLoading(true);
     try {
