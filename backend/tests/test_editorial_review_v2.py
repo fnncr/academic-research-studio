@@ -3,6 +3,7 @@ from uuid import uuid4
 
 from app.editorial_review_v2 import inspect
 from app.manuscript_schema import ManuscriptDocument
+from test_projects import storage  # noqa: F401 - PostgreSQL fixture dependency
 from test_manuscripts import manuscript, save  # noqa: F401 - postgres fixture
 
 
@@ -74,6 +75,7 @@ def test_review_scoped_to_saved_revision_and_owner(monkeypatch, manuscript):
                    {"id": str(uuid4()), "type": "paragraph", "text": PHRASE}]
     }).json()
     url = f"/api/projects/{project_id}/editorial/revisions/{saved['id']}/preview"
+    monkeypatch.delenv('MODEL_OWNER_TOKEN', raising=False)
     assert client.get(url).status_code == 503  # No configured owner secret.
     monkeypatch.setenv("MODEL_OWNER_TOKEN", "owner-" + "s" * 40)
     assert client.get(url).status_code == 401
