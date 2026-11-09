@@ -12,7 +12,7 @@ from app.editorial_registry_v2 import DIAGNOSTICS, EXTENSION_VERSION
 from app.manuscript_schema import ManuscriptDocument
 
 WORD = re.compile(r"[^\W_]+(?:[-’'][^\W_]+)*", re.UNICODE)
-SENTENCE = re.compile(r"[^.!?\n]+(?:[.!?]+|$)", re.UNICODE)
+SENTENCE = re.compile(r"[^.!?\n]+(?:[.!?]+|(?=\n|$))", re.UNICODE)
 VERSION = "lexical-near-duplicate-1.0.0"
 MAX_FINDINGS = 40
 
@@ -69,7 +69,8 @@ def inspect(document: ManuscriptDocument, revision_id: UUID | str) -> dict:
             # Avoid false matches for genre-standard terminology alone.
             if norm != old[4]:
                 overlap = len(set(words) & set(old[3])) / max(1, len(set(words) | set(old[3])))
-                if overlap < .84 or SequenceMatcher(None, norm, old[4], autojunk=False).ratio() < .94:
+                if (overlap < .84 or len(norm) > 1500 or len(old[4]) > 1500 or
+                        SequenceMatcher(None, norm, old[4], autojunk=False).ratio() < .94):
                     continue
             candidate = previous
             break
@@ -96,7 +97,7 @@ def inspect(document: ManuscriptDocument, revision_id: UUID | str) -> dict:
     coverage = [
         {"criterion_id": key, "title": value[0],
          "status": ("candidate" if any(f["criterion_id"] == key for f in findings)
-                    else "no_issue" if value[1] == "lexical_candidate" and len(eligible_blocks) >= 2
+                    else "no_issue" if value[1] == "lexical_candidate" and len(eligible_blocks) >= (2 if key == "35" else 5)
                     else "insufficient_data"),
          "method": value[1]}
         for key, value in DIAGNOSTICS.items()
