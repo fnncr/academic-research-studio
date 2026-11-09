@@ -16,6 +16,7 @@ from app.sources import router as sources_router
 from app.evidence import router as evidence_router
 from app.exports import router as exports_router
 from app.model_api import router as model_router
+from app.editorial_api import router as editorial_router
 
 MAX_UPLOAD = 10 * 1024 * 1024
 TIMEOUT = 15
@@ -46,6 +47,7 @@ app.include_router(sources_router)
 app.include_router(evidence_router)
 app.include_router(exports_router)
 app.include_router(model_router)
+app.include_router(editorial_router)
 
 
 @app.middleware('http')
