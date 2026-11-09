@@ -37,12 +37,17 @@ def inspect(document: ManuscriptDocument, revision_id: UUID | str) -> dict:
     sentences = []
     for block_id, text in _text_nodes(document):
         for m in SENTENCE.finditer(text):
-            sample = m.group().strip()
+            raw = m.group()
+            first_word = WORD.search(raw)
+            if first_word is None:
+                continue
+            # Exclude leading punctuation/emoji without losing UTF-16 anchors.
+            sample = raw[first_word.start():].strip()
             words = _tokens(sample)
             # Short conventional expressions are not meaningful repetitions.
             if len(words) < 10:
                 continue
-            start = m.start() + len(m.group()) - len(m.group().lstrip())
+            start = m.start() + first_word.start()
             end = m.end()
             norm = " ".join(words)
             sentences.append((block_id, text, sample, words, norm, start, end))
