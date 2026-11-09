@@ -6,7 +6,7 @@ import EditorialReview from './EditorialReview';
 beforeEach(() => vi.restoreAllMocks());
 
 it('requires a key and accurately labels non-implemented criteria', async () => {
-  const fetcher = vi.fn(async () => ({
+  const fetcher = vi.fn(async (_url: string, _options?: RequestInit) => ({
     ok: true,
     json: async () => ({
       revision_id: 'rev-1',
