@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState, type ChangeEvent } from 'react';
 import ModelAssistant from './ModelAssistant';
+import EditorialReview from './EditorialReview';
 import ExportPanel from './ExportPanel';
 import EvidenceWorkspace from './EvidenceWorkspace';
 import ManuscriptBlock from './ManuscriptBlock';
@@ -24,6 +25,7 @@ export function ManuscriptDiff({ before, after }: { before: ManuscriptDocument; 
 
 export default function Manuscript({ projectId, onDirty }: { projectId: string; onDirty: (dirty: boolean) => void }) {
   const [assistantOpen, setAssistantOpen] = useState(false);
+  const [editorialOpen, setEditorialOpen] = useState(false);
   const [assistantBusy, setAssistantBusy] = useState(false);
   const reportAssistantBusy = useCallback((value: boolean) => setAssistantBusy(value), []);
   const latestDirty = useRef(false);
@@ -138,6 +140,7 @@ export default function Manuscript({ projectId, onDirty }: { projectId: string; 
       {compared && <section><h3>Версия {compared.number} → текущий черновик</h3><ManuscriptDiff before={compared.document} after={draft} /><button disabled={busy || assistantBusy} onClick={() => { edit(compared.document); setRestoredFrom(compared.id); setStatus(`Версия ${compared.number} загружена в черновик. Сохраните её новой версией, чтобы завершить восстановление.`); }}>Восстановить версию {compared.number} в черновик</button></section>}
     </section></>}
     {base && <><button disabled={busy || assistantBusy} onClick={() => setEvidenceOpen(true)}>Открыть научные доказательства</button>{evidenceOpen && <EvidenceWorkspace projectId={projectId} manuscript={base} manuscriptDirty={dirty} onDirty={reportEvidenceDirty} />}</>}
+    {base && <><button disabled={busy || assistantBusy} onClick={() => setEditorialOpen(value => !value)}>Редакторская проверка сохранённой версии</button>{editorialOpen && <EditorialReview projectId={projectId} revisionId={base.id} unsaved={dirty} />}</>}
     <button disabled={busy || assistantBusy} onClick={() => setAssistantOpen(true)}>Открыть AI Research Assistant</button>{assistantOpen && <ModelAssistant projectId={projectId} savedId={base?.id} unsaved={dirty || evidenceDirty || busy} onBusy={reportAssistantBusy} onAccepted={async () => {
       const current = await api<Revision>(path);
       if (latestDirty.current) { setRemote(current); setConflict(true); return; }
