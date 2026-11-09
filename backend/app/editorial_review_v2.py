@@ -11,7 +11,7 @@ from uuid import UUID
 from app.editorial_registry_v2 import DIAGNOSTICS, EXTENSION_VERSION
 from app.manuscript_schema import ManuscriptDocument
 
-WORD = re.compile(r"[^\\W_]+(?:[-’'][^\\W_]+)*", re.UNICODE)
+WORD = re.compile(r"[^\W_]+(?:[-’'][^\W_]+)*", re.UNICODE)
 SENTENCE = re.compile(r"[^.!?\n]+(?:[.!?]+|$)", re.UNICODE)
 VERSION = "lexical-near-duplicate-1.0.0"
 MAX_FINDINGS = 40
@@ -48,6 +48,7 @@ def inspect(document: ManuscriptDocument, revision_id: UUID | str) -> dict:
             sentences.append((block_id, text, sample, words, norm, start, end))
 
     findings = []
+    eligible_blocks = {item[0] for item in sentences}
     # Bounded by the document contract (<=250k chars); avoid quadratic scans
     # on thousands of sentences by comparing only a limited recent window and
     # exact normalized duplicates at arbitrary distances.
@@ -95,7 +96,7 @@ def inspect(document: ManuscriptDocument, revision_id: UUID | str) -> dict:
     coverage = [
         {"criterion_id": key, "title": value[0],
          "status": ("candidate" if any(f["criterion_id"] == key for f in findings)
-                    else "no_issue" if value[1] == "lexical_candidate" and sentences
+                    else "no_issue" if value[1] == "lexical_candidate" and len(eligible_blocks) >= 2
                     else "insufficient_data"),
          "method": value[1]}
         for key, value in DIAGNOSTICS.items()
